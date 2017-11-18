@@ -128,6 +128,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="baseModel.h" />
+    <ClInclude Include="camera.h" />
     <ClInclude Include="shaderProgram.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />

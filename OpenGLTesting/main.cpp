@@ -1,11 +1,11 @@
 #include <stdio.h>
-#include <math.h>
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "camera.h"
 #include "shaderProgram.h"
 #include "texture.h"
 #include "baseModel.h"
@@ -13,21 +13,16 @@
 
 void printMajorAndMinorGlVersion();
 void mouse_callback(GLFWwindow * window, double xpos, double ypos);
-void processInput(GLFWwindow * window, float deltaTime);
+void processInput(GLFWwindow * window, double deltaTime);
 
 
 const int WIDTH = 1600;
 const int HEIGHT = 900;
+const int FPS = 120;
+const float FOV = 60.0f;
 
 // Camera creation
-const float cameraSpeed = 5.0f;
-const float cameraSens = 0.1f;
-const float FOV = 60.0f;
-double pitch = 0.0f;
-double yaw = -90.0f;
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 10.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+Camera freeLookCam;
 
 
 void printMajorAndMinorGlVersion()
@@ -55,23 +50,10 @@ void mouse_callback(GLFWwindow * window, double xpos, double ypos)
 	lastX = xpos;
 	lastY = ypos;
 
-	xOff *= cameraSens;
-	yOff *= cameraSens;
-
-	yaw = std::fmod((yaw + xOff), (float)360.0f);
-	pitch += yOff;
-
-	if (pitch > 89.0) pitch = 89.0;
-	if (pitch < -89.0) pitch = -89.0;
-
-	glm::vec3 front;
-	front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
-	front.y = sin(glm::radians(pitch));
-	front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
-	cameraFront = glm::normalize(front);
+	freeLookCam.ProcessMouseMovement(xOff, yOff);
 }
 
-void processInput(GLFWwindow * window, float deltaTime)
+void processInput(GLFWwindow * window, double deltaTime)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
@@ -79,14 +61,15 @@ void processInput(GLFWwindow * window, float deltaTime)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	if (glfwGetKey(window, GLFW_KEY_F10) == GLFW_PRESS)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		cameraPos += (cameraSpeed * deltaTime) * cameraFront;
+		freeLookCam.ProcessKeyboard(FORWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		cameraPos -= (cameraSpeed * deltaTime) * cameraFront;
+		freeLookCam.ProcessKeyboard(BACKWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * (cameraSpeed * deltaTime);
+		freeLookCam.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * (cameraSpeed * deltaTime);
+		freeLookCam.ProcessKeyboard(RIGHT, deltaTime);
 }
 
 
@@ -193,15 +176,15 @@ int main()
 
 
 	// Game loop
-	float deltaTime = 0.0f;
-	float lastFrame = 0.0f;
+	double deltaTime = 0.0f;
+	double lastFrame = 0.0f;
 	while (!glfwWindowShouldClose(window))
 	{
 		// Delta calculations
-		float currentFrame = glfwGetTime();
+		double currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
-
+		printf("\r delta time: %f", deltaTime * 1000.0);
 
 		// Event handling
 		processInput(window, deltaTime);
@@ -222,7 +205,7 @@ int main()
 		float camX = sin(glfwGetTime()) * radius;
 		float camZ = cos(glfwGetTime()) * radius;
 		glm::mat4 viewMat;
-		viewMat = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		viewMat = freeLookCam.GetViewMatrix();
 
 		shaderProgramUse(&texProgram);
 		textureUse(&container, 0);
