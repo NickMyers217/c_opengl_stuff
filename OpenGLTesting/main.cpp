@@ -64,14 +64,15 @@ int main()
 	}
 
 	glViewport(0, 0, WIDTH, HEIGHT);
+	glEnable(GL_DEPTH_TEST);
 	printMajorAndMinorGlVersion();
 
 
 	// Shader program creation
-	ShaderProgram programOne;
-	shaderProgramBuild(&programOne, "basic_vertex.glsl", "basic_frag.glsl");
-	ShaderProgram programTwo;
-	shaderProgramBuild(&programTwo, "basic_vertex.glsl", "basic_frag_two.glsl");
+	ShaderProgram texProgram;
+	shaderProgramBuild(&texProgram, "basic_vertex.glsl", "basic_frag.glsl");
+	ShaderProgram blueProgram;
+	shaderProgramBuild(&blueProgram, "basic_vertex.glsl", "basic_frag_two.glsl");
 
 
 	// Texture creation
@@ -79,9 +80,9 @@ int main()
 	textureInit(&container, "container.jpg", false, false);
 	Texture moonman;
 	textureInit(&moonman, "moonman.png", true, true);
-	shaderProgramUse(&programOne);
-	glUniform1i(glGetUniformLocation(programOne.id, "texture0"), 0);
-	glUniform1i(glGetUniformLocation(programOne.id, "texture1"), 1);
+	shaderProgramUse(&texProgram);
+	glUniform1i(glGetUniformLocation(texProgram.id, "texture0"), 0);
+	glUniform1i(glGetUniformLocation(texProgram.id, "texture1"), 1);
 
 
 	// Model creation
@@ -96,34 +97,54 @@ int main()
 		 0.0f,  0.5f, 0.0f,  1.0f, 1.0f, // Top Right
 		 0.0f, -0.5f, 0.0f,  1.0f, 0.0f, // Bot Right
 	};
-	BaseModel modelOne;
-	modelInit(&modelOne, VERTICES_ONE, sizeof(VERTICES_ONE) / sizeof(GLfloat));
+	BaseModel planeModel;
+	modelInit(&planeModel, VERTICES_ONE, sizeof(VERTICES_ONE) / sizeof(GLfloat));
 
 	GLfloat VERTICES_TWO[] = {
-		 0.0f, -0.5f, 0.0f,  0.0f, 0.0f,
-		 0.5f,  0.5f, 0.0f,  0.5f, 1.0f,
-		 1.0f, -0.5f, 0.0f,  1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
-	BaseModel modelTwo;
-	modelInit(&modelTwo, VERTICES_TWO, sizeof(VERTICES_TWO) / sizeof(GLfloat));
-
-
-	// Transformation and Uniform Stuff
-	glm::mat4 modelMat;
-	modelMat = glm::rotate(modelMat, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	glm::mat4 viewMat;
-	viewMat = glm::translate(viewMat, glm::vec3(0.0f, 0.0f, -3.0f));
-	glm::mat4 projectionMat = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
-
-
-	shaderProgramUse(&programOne);
-	glUniformMatrix4fv(glGetUniformLocation(programOne.id, "model"), 1, GL_FALSE, glm::value_ptr(modelMat));
-	glUniformMatrix4fv(glGetUniformLocation(programOne.id, "view"), 1, GL_FALSE, glm::value_ptr(viewMat));
-	glUniformMatrix4fv(glGetUniformLocation(programOne.id, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMat));
-	shaderProgramUse(&programTwo);
-	glUniformMatrix4fv(glGetUniformLocation(programTwo.id, "model"), 1, GL_FALSE, glm::value_ptr(modelMat));
-	glUniformMatrix4fv(glGetUniformLocation(programTwo.id, "view"), 1, GL_FALSE, glm::value_ptr(viewMat));
-	glUniformMatrix4fv(glGetUniformLocation(programTwo.id, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMat));
+	BaseModel cubeModel;
+	modelInit(&cubeModel, VERTICES_TWO, sizeof(VERTICES_TWO) / sizeof(GLfloat));
 
 
 	// Game loop
@@ -135,17 +156,31 @@ int main()
 
 		// Clear
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+		// Transformations
+		glm::mat4 modelMat;
+		modelMat = glm::rotate(modelMat, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		glm::mat4 viewMat;
+		viewMat = glm::translate(viewMat, glm::vec3(0.0f, 0.0f, -3.0f));
+		glm::mat4 projectionMat = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
 
 		//Rendering
-		shaderProgramUse(&programOne);
+		shaderProgramUse(&texProgram);
+		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "model"), 1, GL_FALSE, glm::value_ptr(modelMat));
+		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "view"), 1, GL_FALSE, glm::value_ptr(viewMat));
+		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMat));
 		textureUse(&container, 0);
 		textureUse(&moonman, 1);
-		modelRender(&modelOne);
+		modelRender(&cubeModel);
 
-		shaderProgramUse(&programTwo);
-		modelRender(&modelTwo);
+		//shaderProgramUse(&blueProgram);
+		//glUniformMatrix4fv(glGetUniformLocation(blueProgram.id, "model"), 1, GL_FALSE, glm::value_ptr(modelMat));
+		//glUniformMatrix4fv(glGetUniformLocation(blueProgram.id, "view"), 1, GL_FALSE, glm::value_ptr(viewMat));
+		//glUniformMatrix4fv(glGetUniformLocation(blueProgram.id, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMat));
+		//modelRender(&planeModel);
 
 
 		// Swap and poll
@@ -155,12 +190,12 @@ int main()
 
 
 	// Clean up
-	modelFree(&modelOne);
-	modelFree(&modelTwo);
+	modelFree(&planeModel);
+	modelFree(&cubeModel);
 	textureFree(&container);
 	textureFree(&moonman);
-	shaderProgramFree(&programOne);
-	shaderProgramFree(&programTwo);
+	shaderProgramFree(&texProgram);
+	shaderProgramFree(&blueProgram);
 	glfwTerminate();
 	return 0;
 }
