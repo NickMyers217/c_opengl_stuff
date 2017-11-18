@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "shaderProgram.h"
 #include "texture.h"
@@ -105,14 +108,30 @@ int main()
 	modelInit(&modelTwo, VERTICES_TWO, sizeof(VERTICES_TWO) / sizeof(GLfloat));
 
 
+	// Transformation and Uniform Stuff
+	glm::mat4 trans;
+	trans = glm::translate(trans, glm::vec3());
+	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	trans = glm::scale(trans, glm::vec3(0.5f));
+	shaderProgramUse(&programOne);
+	glUniformMatrix4fv(glGetUniformLocation(programOne.id, "transform"), 1, GL_FALSE, glm::value_ptr(trans));
+	shaderProgramUse(&programTwo);
+	glUniformMatrix4fv(glGetUniformLocation(programTwo.id, "transform"), 1, GL_FALSE, glm::value_ptr(trans));
+
+
 	// Game loop
 	while (!glfwWindowShouldClose(window))
 	{
+		// Event handling
 		processInput(window);
 
+
+		// Clear
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+
+		//Rendering
 		shaderProgramUse(&programOne);
 		textureUse(&container, 0);
 		textureUse(&moonman, 1);
@@ -121,6 +140,8 @@ int main()
 		shaderProgramUse(&programTwo);
 		modelRender(&modelTwo);
 
+
+		// Swap and poll
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
