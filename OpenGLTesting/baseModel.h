@@ -12,17 +12,17 @@ struct BaseModel {
 };
 
 
-void modelInit(BaseModel * model, const GLfloat * buffer, unsigned int dataLength);
+void modelInit(BaseModel * model, const GLfloat * buffer, unsigned int bufferLength);
 void modelRender(BaseModel * model);
 void modelFree(BaseModel * model);
 
 
-void modelInit(BaseModel * model, const GLfloat * buffer, unsigned int dataLength)
+void modelInit(BaseModel * model, const GLfloat * buffer, unsigned int bufferLength)
 {
 	glGenVertexArrays(1, &model->vaoId);
 	glGenBuffers(1, &model->vboId);
 
-	model->bufferLength = dataLength;
+	model->bufferLength = bufferLength;
 	model->bufferSize = model->bufferLength * sizeof(GLfloat);
 	model->buffer = (GLfloat *)malloc(model->bufferSize);
 	memcpy(model->buffer, buffer, model->bufferSize);
@@ -30,8 +30,10 @@ void modelInit(BaseModel * model, const GLfloat * buffer, unsigned int dataLengt
 	glBindVertexArray(model->vaoId);
 	glBindBuffer(GL_ARRAY_BUFFER, model->vboId);
 	glBufferData(GL_ARRAY_BUFFER, model->bufferSize, model->buffer, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (void *)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (void *)(3 * sizeof(GL_FLOAT)));
+	glEnableVertexAttribArray(1);
 }
 
 void modelRender(BaseModel * model)

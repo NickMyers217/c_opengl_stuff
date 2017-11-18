@@ -119,6 +119,7 @@
   <ItemGroup>
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="stb_image.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\basic_frag.glsl" />
@@ -128,6 +129,8 @@
   <ItemGroup>
     <ClInclude Include="baseModel.h" />
     <ClInclude Include="shaderProgram.h" />
+    <ClInclude Include="stb_image.h" />
+    <ClInclude Include="texture.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
