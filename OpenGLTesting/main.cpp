@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
 #include <glm/glm.hpp>
@@ -11,15 +12,20 @@
 
 
 void printMajorAndMinorGlVersion();
+void mouse_callback(GLFWwindow * window, double xpos, double ypos);
 void processInput(GLFWwindow * window, float deltaTime);
 
 
-const int WIDTH = 800;
-const int HEIGHT = 600;
+const int WIDTH = 1600;
+const int HEIGHT = 900;
 
 // Camera creation
-const float cameraSpeed = 3.0f;
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+const float cameraSpeed = 5.0f;
+const float cameraSens = 0.1f;
+const float FOV = 60.0f;
+double pitch = 0.0f;
+double yaw = -90.0f;
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 10.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -30,6 +36,39 @@ void printMajorAndMinorGlVersion()
 	glGetIntegerv(GL_MAJOR_VERSION, &version.major);
 	glGetIntegerv(GL_MINOR_VERSION, &version.minor);
 	printf("Initializing OpenGL V%i.%i\n", version.major, version.minor);
+}
+
+float lastX = (float)WIDTH / 2.0f;
+float lastY = (float)HEIGHT / 2.0f;
+bool firstMouse = true;
+void mouse_callback(GLFWwindow * window, double xpos, double ypos)
+{
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xOff = xpos - lastX;
+	float yOff = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	xOff *= cameraSens;
+	yOff *= cameraSens;
+
+	yaw = std::fmod((yaw + xOff), (float)360.0f);
+	pitch += yOff;
+
+	if (pitch > 89.0) pitch = 89.0;
+	if (pitch < -89.0) pitch = -89.0;
+
+	glm::vec3 front;
+	front.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
+	front.y = sin(glm::radians(pitch));
+	front.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+	cameraFront = glm::normalize(front);
 }
 
 void processInput(GLFWwindow * window, float deltaTime)
@@ -66,7 +105,11 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
+	const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	glfwSetWindowPos(window, mode->width/2 - WIDTH/2, mode->height/2 - HEIGHT/2);
 	glfwMakeContextCurrent(window);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
 	// OpenGL initialization
@@ -146,7 +189,7 @@ int main()
 	modelInit(&anotherCubeModel, CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
 
 
-	glm::mat4 projectionMat = glm::perspective(glm::radians(60.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+	glm::mat4 projectionMat = glm::perspective(glm::radians(FOV), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
 
 	// Game loop
