@@ -109,14 +109,21 @@ int main()
 
 
 	// Transformation and Uniform Stuff
-	glm::mat4 trans;
-	trans = glm::translate(trans, glm::vec3());
-	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	trans = glm::scale(trans, glm::vec3(0.5f));
+	glm::mat4 modelMat;
+	modelMat = glm::rotate(modelMat, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	glm::mat4 viewMat;
+	viewMat = glm::translate(viewMat, glm::vec3(0.0f, 0.0f, -3.0f));
+	glm::mat4 projectionMat = glm::perspective(glm::radians(45.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+
+
 	shaderProgramUse(&programOne);
-	glUniformMatrix4fv(glGetUniformLocation(programOne.id, "transform"), 1, GL_FALSE, glm::value_ptr(trans));
+	glUniformMatrix4fv(glGetUniformLocation(programOne.id, "model"), 1, GL_FALSE, glm::value_ptr(modelMat));
+	glUniformMatrix4fv(glGetUniformLocation(programOne.id, "view"), 1, GL_FALSE, glm::value_ptr(viewMat));
+	glUniformMatrix4fv(glGetUniformLocation(programOne.id, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMat));
 	shaderProgramUse(&programTwo);
-	glUniformMatrix4fv(glGetUniformLocation(programTwo.id, "transform"), 1, GL_FALSE, glm::value_ptr(trans));
+	glUniformMatrix4fv(glGetUniformLocation(programTwo.id, "model"), 1, GL_FALSE, glm::value_ptr(modelMat));
+	glUniformMatrix4fv(glGetUniformLocation(programTwo.id, "view"), 1, GL_FALSE, glm::value_ptr(viewMat));
+	glUniformMatrix4fv(glGetUniformLocation(programTwo.id, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMat));
 
 
 	// Game loop
