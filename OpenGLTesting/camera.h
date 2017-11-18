@@ -40,6 +40,8 @@ public:
 	float MovementSpeed;
 	float MouseSensitivity;
 	float Zoom;
+	// Behaviours
+	bool NoClip;
 
 	// Constructor with vectors
 	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
@@ -48,6 +50,7 @@ public:
 		WorldUp = up;
 		Yaw = yaw;
 		Pitch = pitch;
+		NoClip = true;
 		updateCameraVectors();
 	}
 	// Constructor with scalar values
@@ -57,6 +60,7 @@ public:
 		WorldUp = glm::vec3(upX, upY, upZ);
 		Yaw = yaw;
 		Pitch = pitch;
+		NoClip = true;
 		updateCameraVectors();
 	}
 
@@ -70,10 +74,14 @@ public:
 	void ProcessKeyboard(Camera_Movement direction, double deltaTime)
 	{
 		float velocity = MovementSpeed * deltaTime;
+		glm::vec3 newFront = Front;
+		if (!NoClip) {
+			newFront = glm::normalize(glm::vec3(Front.x, 0.0f, Front.z));
+		}
 		if (direction == FORWARD)
-			Position += Front * velocity;
+			Position += newFront * velocity;
 		if (direction == BACKWARD)
-			Position -= Front * velocity;
+			Position -= newFront * velocity;
 		if (direction == LEFT)
 			Position -= Right * velocity;
 		if (direction == RIGHT)
