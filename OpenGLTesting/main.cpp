@@ -149,7 +149,7 @@ int main()
 		double currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
-		printf("\r delta time: %f", deltaTime * 1000.0);
+		printf("\rFPS: %f", 1.0 / deltaTime);
 
 		// Event handling
 		processInput(window, deltaTime);
