@@ -75,9 +75,6 @@ int main()
 
 	textureInit(&container, "container.jpg", false, false);
 	textureInit(&moonman, "moonman.png", true, true);
-	shaderProgramUse(&texProgram);
-	glUniform1i(glGetUniformLocation(texProgram.id, "texture0"), 0);
-	glUniform1i(glGetUniformLocation(texProgram.id, "texture1"), 1);
 
 	modelInit(&cubeModel, CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
 	modelInit(&lampCubeModel, CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
@@ -103,19 +100,27 @@ int main()
 
 		// Uniforms & Rendering
 		shaderProgramUse(&texProgram);
-		textureUse(&container, 0);
-		textureUse(&moonman, 1);
 		float movementAmt = sin((float)glfwGetTime()) * 2.0f + 1;
 		float rotAmt = sin((float)glfwGetTime() * 0.5f + 1.0f);
 		glm::mat4 modelMat;
 		modelMat = glm::translate(modelMat, glm::vec3(movementAmt, movementAmt, -2.0f));
 		modelMat = glm::rotate(modelMat, rotAmt, glm::vec3(1.0f, 1.0f, 0.0f));
 		glm::mat4 viewMat = freeLookCam.GetViewMatrix();
+		textureUse(&container, 0);
+		textureUse(&moonman, 1);
+		glUniform1i(glGetUniformLocation(texProgram.id, "texture0"), 0);
+		glUniform1i(glGetUniformLocation(texProgram.id, "texture1"), 1);
 		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "model"), 1, GL_FALSE, glm::value_ptr(modelMat));
 		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "view"), 1, GL_FALSE, glm::value_ptr(viewMat));
 		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMat));
-		glUniform3f(glGetUniformLocation(texProgram.id, "lightColor"), 1.0f, 1.0f, 1.0f);
-		glUniform3f(glGetUniformLocation(texProgram.id, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
+		glUniform3f(glGetUniformLocation(texProgram.id, "material.ambient"), 1.0f, 0.5f, 0.31f);
+		glUniform3f(glGetUniformLocation(texProgram.id, "material.diffuse"), 1.0f, 0.5f, 0.31f);
+		glUniform3f(glGetUniformLocation(texProgram.id, "material.specular"), 0.5f, 0.5f, 0.5f);
+		glUniform1f(glGetUniformLocation(texProgram.id, "material.shininess"), 32.0f);
+		glUniform3f(glGetUniformLocation(texProgram.id, "light.position"), lightPos.x, lightPos.y, lightPos.z);
+		glUniform3f(glGetUniformLocation(texProgram.id, "light.ambient"), 0.2f, 0.2f, 0.2f);
+		glUniform3f(glGetUniformLocation(texProgram.id, "light.diffuse"), 0.5f, 0.5f, 0.5f);
+		glUniform3f(glGetUniformLocation(texProgram.id, "light.specular"), 1.0f, 1.0f, 1.0f);
 		modelRender(&cubeModel);
 
 		shaderProgramUse(&lampProgram);
