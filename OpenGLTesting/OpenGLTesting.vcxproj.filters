@@ -29,17 +29,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\basic_frag.glsl">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
-    <None Include="res\shaders\basic_vertex.glsl">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
-    <None Include="res\shaders\basic_frag_two.glsl">
-      <Filter>Resource Files\shaders</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="shaderProgram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -58,5 +47,22 @@
     <ClInclude Include="camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cubeData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\shaders\basic_vertex.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="res\shaders\lamp_frag.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="res\shaders\texture_frag.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="res\shaders\texture_and_lighting_frag.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

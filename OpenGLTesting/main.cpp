@@ -8,7 +8,11 @@
 #include "camera.h"
 #include "shaderProgram.h"
 #include "texture.h"
+#include "cubeData.h"
 #include "baseModel.h"
+
+
+// TODO: add a window abstraction at some point
 
 
 void printMajorAndMinorGlVersion();
@@ -104,12 +108,15 @@ int main()
 	}
 	glViewport(0, 0, WIDTH, HEIGHT);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 	printMajorAndMinorGlVersion();
 
 
 	// Shader program creation
 	ShaderProgram texProgram;
-	shaderProgramBuild(&texProgram, "basic_vertex.glsl", "basic_frag.glsl");
+	shaderProgramBuild(&texProgram, "basic_vertex.glsl", "texture_and_lighting_frag.glsl");
+	ShaderProgram lampProgram;
+	shaderProgramBuild(&lampProgram, "basic_vertex.glsl", "lamp_frag.glsl");
 
 
 	// Texture creation
@@ -123,56 +130,14 @@ int main()
 
 
 	// Model creation
-	GLfloat CUBE_VERTICES[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
 	BaseModel cubeModel;
 	modelInit(&cubeModel, CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
-	BaseModel anotherCubeModel;
-	modelInit(&anotherCubeModel, CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
+	BaseModel lampCubeModel;
+	modelInit(&lampCubeModel, CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
 
 
 	glm::mat4 projectionMat = glm::perspective(glm::radians(FOV), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+	glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 2.0f);
 
 
 	// Game loop
@@ -196,29 +161,28 @@ int main()
 
 
 		// Uniforms & Rendering
-		glm::mat4 modelMat;
-		modelMat = glm::rotate(modelMat, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		glm::mat4 anotherModelMat;
-		anotherModelMat = glm::translate(anotherModelMat, glm::vec3(-2.0f, 0.25f, 0.0f));
-
-		float radius = 10.0f;
-		float camX = sin(glfwGetTime()) * radius;
-		float camZ = cos(glfwGetTime()) * radius;
-		glm::mat4 viewMat;
-		viewMat = freeLookCam.GetViewMatrix();
-
 		shaderProgramUse(&texProgram);
 		textureUse(&container, 0);
 		textureUse(&moonman, 1);
-
+		glm::mat4 modelMat;
+		modelMat = glm::translate(modelMat, glm::vec3(1.0f, 0.0f, sin((float)glfwGetTime()) * 2.0f - 2.0f));
+		modelMat = glm::rotate(modelMat, sin((float)glfwGetTime() * 0.5f + 1.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+		glm::mat4 viewMat = freeLookCam.GetViewMatrix();
 		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "model"), 1, GL_FALSE, glm::value_ptr(modelMat));
 		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "view"), 1, GL_FALSE, glm::value_ptr(viewMat));
 		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMat));
+		glUniform3f(glGetUniformLocation(texProgram.id, "lightColor"), 1.0f, 1.0f, 1.0f);
+		glUniform3f(glGetUniformLocation(texProgram.id, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 		modelRender(&cubeModel);
 
-		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "model"), 1, GL_FALSE, glm::value_ptr(anotherModelMat));
-		modelRender(&anotherCubeModel);
-
+		shaderProgramUse(&lampProgram);
+		modelMat = glm::mat4();
+		modelMat = glm::translate(modelMat, lightPos);
+		modelMat = glm::scale(modelMat, glm::vec3(0.2f));
+		glUniformMatrix4fv(glGetUniformLocation(lampProgram.id, "model"), 1, GL_FALSE, glm::value_ptr(modelMat));
+		glUniformMatrix4fv(glGetUniformLocation(lampProgram.id, "view"), 1, GL_FALSE, glm::value_ptr(viewMat));
+		glUniformMatrix4fv(glGetUniformLocation(lampProgram.id, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMat));
+		modelRender(&lampCubeModel);
 
 		// Swap and poll
 		glfwSwapBuffers(window);
@@ -228,9 +192,10 @@ int main()
 
 	// Clean up
 	modelFree(&cubeModel);
-	modelFree(&anotherCubeModel);
+	modelFree(&lampCubeModel);
 	textureFree(&container);
 	textureFree(&moonman);
+	shaderProgramFree(&lampProgram);
 	shaderProgramFree(&texProgram);
 	glfwTerminate();
 	return 0;

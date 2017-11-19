@@ -122,17 +122,19 @@
     <ClCompile Include="stb_image.c" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\basic_frag.glsl" />
-    <None Include="res\shaders\basic_frag_two.glsl" />
-    <None Include="res\shaders\basic_vertex.glsl" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="baseModel.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="cubeData.h" />
     <ClInclude Include="shaderProgram.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\shaders\basic_vertex.glsl" />
+    <None Include="res\shaders\lamp_frag.glsl" />
+    <None Include="res\shaders\texture_and_lighting_frag.glsl" />
+    <None Include="res\shaders\texture_frag.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
