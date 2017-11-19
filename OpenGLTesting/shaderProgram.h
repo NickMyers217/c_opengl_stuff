@@ -2,7 +2,8 @@
 
 #include <stdio.h>
 #include <string>
-#include <glad\glad.h>
+#include <glad/glad.h>
+#include <glm/glm.hpp>
 
 #include "utils.h"
 
@@ -19,6 +20,10 @@ void compileShader(GLuint id, const char * shaderSource);
 void shaderProgramBuild(ShaderProgram * program, const char * vertexShaderSource, const char * fragmentShaderSource);
 void shaderProgramUse(ShaderProgram * program);
 void shaderProgramFree(ShaderProgram * program);
+void shaderProgramSet(ShaderProgram * program, const char * uniform, int value);
+void shaderProgramSet(ShaderProgram * program, const char * uniform, float value);
+void shaderProgramSet(ShaderProgram * program, const char * uniform, glm::vec3& value);
+void shaderProgramSet(ShaderProgram * program, const char * uniform, glm::mat4& value);
 
 
 void compileShader(GLuint id, const char * shaderSource)
@@ -68,8 +73,27 @@ void shaderProgramUse(ShaderProgram * program)
 	glUseProgram(program->id);
 }
 
-
 void shaderProgramFree(ShaderProgram * program)
 {
 	glDeleteProgram(program->id);
+}
+
+inline void shaderProgramSet(ShaderProgram * program, const char * uniform, int value)
+{
+	glUniform1i(glGetUniformLocation(program->id, uniform), value);
+}
+
+inline void shaderProgramSet(ShaderProgram * program, const char * uniform, float value)
+{
+	glUniform1f(glGetUniformLocation(program->id, uniform), value);
+}
+
+inline void shaderProgramSet(ShaderProgram * program, const char * uniform, glm::vec3& value)
+{
+	glUniform3f(glGetUniformLocation(program->id, uniform), value.x, value.y, value.z);
+}
+
+inline void shaderProgramSet(ShaderProgram * program, const char * uniform, glm::mat4& value)
+{
+	glUniformMatrix4fv(glGetUniformLocation(program->id, uniform), 1, GL_FALSE, glm::value_ptr(value));
 }

@@ -108,28 +108,28 @@ int main()
 		glm::mat4 viewMat = freeLookCam.GetViewMatrix();
 		textureUse(&container, 0);
 		textureUse(&moonman, 1);
-		glUniform1i(glGetUniformLocation(texProgram.id, "texture0"), 0);
-		glUniform1i(glGetUniformLocation(texProgram.id, "texture1"), 1);
-		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "model"), 1, GL_FALSE, glm::value_ptr(modelMat));
-		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "view"), 1, GL_FALSE, glm::value_ptr(viewMat));
-		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMat));
-		glUniform3f(glGetUniformLocation(texProgram.id, "material.ambient"), 1.0f, 0.5f, 0.31f);
-		glUniform3f(glGetUniformLocation(texProgram.id, "material.diffuse"), 1.0f, 0.5f, 0.31f);
-		glUniform3f(glGetUniformLocation(texProgram.id, "material.specular"), 0.5f, 0.5f, 0.5f);
-		glUniform1f(glGetUniformLocation(texProgram.id, "material.shininess"), 32.0f);
-		glUniform3f(glGetUniformLocation(texProgram.id, "light.position"), lightPos.x, lightPos.y, lightPos.z);
-		glUniform3f(glGetUniformLocation(texProgram.id, "light.ambient"), 0.2f, 0.2f, 0.2f);
-		glUniform3f(glGetUniformLocation(texProgram.id, "light.diffuse"), 0.5f, 0.5f, 0.5f);
-		glUniform3f(glGetUniformLocation(texProgram.id, "light.specular"), 1.0f, 1.0f, 1.0f);
+		shaderProgramSet(&texProgram, "texture0", 0);
+		shaderProgramSet(&texProgram, "texture1", 1);
+		shaderProgramSet(&texProgram, "model", modelMat);
+		shaderProgramSet(&texProgram, "view", viewMat);
+		shaderProgramSet(&texProgram, "projection", projectionMat);
+		shaderProgramSet(&texProgram, "material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+		shaderProgramSet(&texProgram, "material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+		shaderProgramSet(&texProgram, "material.specular", glm::vec3(0.5f));
+		shaderProgramSet(&texProgram, "material.shininess", 32.0f);
+		shaderProgramSet(&texProgram, "light.position", lightPos);
+		shaderProgramSet(&texProgram, "light.ambient", glm::vec3(0.2f));
+		shaderProgramSet(&texProgram, "light.diffuse", glm::vec3(0.5f));
+		shaderProgramSet(&texProgram, "light.specular", glm::vec3(1.0f));
 		modelRender(&cubeModel);
 
 		shaderProgramUse(&lampProgram);
 		modelMat = glm::mat4();
 		modelMat = glm::translate(modelMat, lightPos);
 		modelMat = glm::scale(modelMat, glm::vec3(0.2f));
-		glUniformMatrix4fv(glGetUniformLocation(lampProgram.id, "model"), 1, GL_FALSE, glm::value_ptr(modelMat));
-		glUniformMatrix4fv(glGetUniformLocation(lampProgram.id, "view"), 1, GL_FALSE, glm::value_ptr(viewMat));
-		glUniformMatrix4fv(glGetUniformLocation(lampProgram.id, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMat));
+		shaderProgramSet(&lampProgram, "model", modelMat);
+		shaderProgramSet(&lampProgram, "view", viewMat);
+		shaderProgramSet(&lampProgram, "projection", projectionMat);
 		modelRender(&lampCubeModel);
 
 		// Swap buffers
