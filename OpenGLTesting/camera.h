@@ -18,9 +18,10 @@ enum Camera_Movement {
 // Default camera values
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
-const float SPEED = 5.0f;
+const float SPEED = 7.0f;
 const float SENSITIVTY = 0.1f;
 const float ZOOM = 45.0f;
+const float FOV = 60.0f;
 
 
 // An abstract camera class that processes input and calculates the corresponding Eular Angles, Vectors and Matrices for use in OpenGL
@@ -119,6 +120,11 @@ public:
 			Zoom = 1.0f;
 		if (Zoom >= 45.0f)
 			Zoom = 45.0f;
+	}
+
+	float GetFov()
+	{
+		return FOV;
 	}
 
 private:

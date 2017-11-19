@@ -24,7 +24,7 @@ void main()
 	vec3 diffuse = diffuseImpact * lightColor;
 
 	// specular lighting
-	float specularStrength = 0.5;
+	float specularStrength = 1.0;
 	vec3 viewPos = vec3(0.0); // its the origin since we are doing this calculation in view space
 	vec3 viewDir = normalize(viewPos - fragPos);
 	vec3 reflectDir = reflect(-lightDir, norm);

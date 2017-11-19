@@ -50,6 +50,9 @@
     <ClInclude Include="cubeData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="screen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\basic_vertex.glsl">

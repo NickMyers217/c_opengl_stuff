@@ -129,6 +129,7 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="utils.h" />
+    <ClInclude Include="screen.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\basic_vertex.glsl" />
