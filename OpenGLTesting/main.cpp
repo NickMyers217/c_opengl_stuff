@@ -23,7 +23,7 @@ void processInput(GLFWwindow * window, double deltaTime);
 const int WIDTH = 1600;
 const int HEIGHT = 900;
 const int FPS = 120;
-const float FOV = 60.0f;
+const float FOV = 50.0f;
 
 // Camera creation
 Camera freeLookCam;
@@ -113,10 +113,10 @@ int main()
 
 
 	// Shader program creation
-	ShaderProgram texProgram;
-	shaderProgramBuild(&texProgram, "basic_vertex.glsl", "texture_and_lighting_frag.glsl");
 	ShaderProgram lampProgram;
 	shaderProgramBuild(&lampProgram, "basic_vertex.glsl", "lamp_frag.glsl");
+	ShaderProgram texProgram;
+	shaderProgramBuild(&texProgram, "basic_vertex.glsl", "texture_phong_frag.glsl");
 
 
 	// Texture creation
@@ -164,9 +164,11 @@ int main()
 		shaderProgramUse(&texProgram);
 		textureUse(&container, 0);
 		textureUse(&moonman, 1);
+		float movementAmt = sin((float)glfwGetTime()) * 2.0f + 1;
+		float rotAmt = sin((float)glfwGetTime() * 0.5f + 1.0f);
 		glm::mat4 modelMat;
-		modelMat = glm::translate(modelMat, glm::vec3(1.0f, 0.0f, sin((float)glfwGetTime()) * 2.0f - 2.0f));
-		modelMat = glm::rotate(modelMat, sin((float)glfwGetTime() * 0.5f + 1.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+		modelMat = glm::translate(modelMat, glm::vec3(movementAmt, movementAmt, 4.0f));
+		modelMat = glm::rotate(modelMat, rotAmt, glm::vec3(1.0f, 1.0f, 0.0f));
 		glm::mat4 viewMat = freeLookCam.GetViewMatrix();
 		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "model"), 1, GL_FALSE, glm::value_ptr(modelMat));
 		glUniformMatrix4fv(glGetUniformLocation(texProgram.id, "view"), 1, GL_FALSE, glm::value_ptr(viewMat));

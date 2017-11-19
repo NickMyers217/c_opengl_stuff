@@ -61,7 +61,7 @@
     <None Include="res\shaders\texture_frag.glsl">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="res\shaders\texture_and_lighting_frag.glsl">
+    <None Include="res\shaders\texture_phong_frag.glsl">
       <Filter>Resource Files\shaders</Filter>
     </None>
   </ItemGroup>

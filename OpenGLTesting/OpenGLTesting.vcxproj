@@ -133,8 +133,8 @@
   <ItemGroup>
     <None Include="res\shaders\basic_vertex.glsl" />
     <None Include="res\shaders\lamp_frag.glsl" />
-    <None Include="res\shaders\texture_and_lighting_frag.glsl" />
     <None Include="res\shaders\texture_frag.glsl" />
+    <None Include="res\shaders\texture_phong_frag.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
