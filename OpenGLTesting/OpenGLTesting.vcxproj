@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -125,6 +125,7 @@
     <ClInclude Include="baseModel.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="cubeData.h" />
+    <ClInclude Include="planeData.h" />
     <ClInclude Include="shaderProgram.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />
