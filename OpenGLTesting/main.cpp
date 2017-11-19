@@ -16,7 +16,7 @@
 Camera freeLookCam;
 Screen screen;
 ShaderProgram lampProgram, texProgram;
-Texture container, moonman;
+Texture container, containerTwo, containerTwoSpecular, moonman;
 BaseModel cubeModel, lampCubeModel;
 
 
@@ -74,6 +74,8 @@ int main()
 	shaderProgramBuild(&texProgram, "basic_vertex.glsl", "texture_phong_frag.glsl");
 
 	textureInit(&container, "container.jpg", false, false);
+	textureInit(&containerTwo, "container2.png", true, true);
+	textureInit(&containerTwoSpecular, "container2_specular.png", true, true);
 	textureInit(&moonman, "moonman.png", true, true);
 
 	modelInit(&cubeModel, CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
@@ -106,21 +108,18 @@ int main()
 		modelMat = glm::translate(modelMat, glm::vec3(movementAmt, movementAmt, -2.0f));
 		modelMat = glm::rotate(modelMat, rotAmt, glm::vec3(1.0f, 1.0f, 0.0f));
 		glm::mat4 viewMat = freeLookCam.GetViewMatrix();
-		textureUse(&container, 0);
-		textureUse(&moonman, 1);
-		shaderProgramSet(&texProgram, "texture0", 0);
-		shaderProgramSet(&texProgram, "texture1", 1);
-		shaderProgramSet(&texProgram, "model", modelMat);
-		shaderProgramSet(&texProgram, "view", viewMat);
-		shaderProgramSet(&texProgram, "projection", projectionMat);
-		shaderProgramSet(&texProgram, "material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-		shaderProgramSet(&texProgram, "material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-		shaderProgramSet(&texProgram, "material.specular", glm::vec3(0.5f));
+		textureUse(&containerTwo, 0);
+		textureUse(&containerTwoSpecular, 1);
+		shaderProgramSet(&texProgram, "material.diffuse", 0);
+		shaderProgramSet(&texProgram, "material.specular", 1);
 		shaderProgramSet(&texProgram, "material.shininess", 32.0f);
 		shaderProgramSet(&texProgram, "light.position", lightPos);
 		shaderProgramSet(&texProgram, "light.ambient", glm::vec3(0.2f));
 		shaderProgramSet(&texProgram, "light.diffuse", glm::vec3(0.5f));
 		shaderProgramSet(&texProgram, "light.specular", glm::vec3(1.0f));
+		shaderProgramSet(&texProgram, "model", modelMat);
+		shaderProgramSet(&texProgram, "view", viewMat);
+		shaderProgramSet(&texProgram, "projection", projectionMat);
 		modelRender(&cubeModel);
 
 		shaderProgramUse(&lampProgram);
@@ -146,6 +145,8 @@ void cleanUp()
 	modelFree(&cubeModel);
 	modelFree(&lampCubeModel);
 	textureFree(&container);
+	textureFree(&containerTwo);
+	textureFree(&containerTwoSpecular);
 	textureFree(&moonman);
 	shaderProgramFree(&lampProgram);
 	shaderProgramFree(&texProgram);
