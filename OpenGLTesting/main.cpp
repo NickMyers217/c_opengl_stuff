@@ -23,7 +23,9 @@ Camera freeLookCam;
 Screen screen;
 ShaderProgram lampProgram, texProgram;
 Texture container, containerTwo, containerTwoSpecular, moonman;
-BaseModel planeModel, cubeModel, lampCubeModel;
+BaseModel planeModel, cubeModel;
+#define NUM_LIGHTS 5
+BaseModel lampModels[NUM_LIGHTS];
 
 
 void mouse_callback(GLFWwindow * window, double xpos, double ypos);
@@ -90,10 +92,24 @@ int main()
 	modelInit(&planeModel, planeVertices, 20 * 20 * (6 * 8));
 	free(planeVertices);
 	modelInit(&cubeModel, CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
-	modelInit(&lampCubeModel, CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
+	for (int i = 0; i < NUM_LIGHTS; i++)
+		modelInit(&lampModels[i], CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
 
 	glm::mat4 projectionMat = glm::perspective(glm::radians(freeLookCam.GetFov()), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
-	glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 2.0f);
+	glm::vec3 lightPositions[NUM_LIGHTS] = {
+		glm::vec3(-8.0f, 1.0f,  8.0f),
+		glm::vec3(-8.0f, 1.0f, -8.0f),
+		glm::vec3( 8.0f, 1.0f, -8.0f),
+		glm::vec3( 8.0f, 1.0f,  8.0f),
+		glm::vec3( 0.0f, 0.0f,  0.0f),
+	};
+	glm::vec3 lightColors[NUM_LIGHTS] = {
+		glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(0.0f, 1.0f, 1.0f),
+		glm::vec3(1.0f, 1.0f, 1.0f),
+	};
 
 	double deltaTime = 0.0f;
 	double lastFrame = 0.0f;
@@ -112,30 +128,82 @@ int main()
 		screenClear(&screen);
 
 		// Uniforms & Rendering
-		float movementAmt = sin((float)glfwGetTime()) * 2.0f + 1;
+		float movementAmt = sin((float)glfwGetTime()) * 2.0f + 0.5f;
 		float rotAmt = sin((float)glfwGetTime() * 0.5f + 1.0f);
 		glm::mat4 modelMat;
 		glm::mat4 viewMat = freeLookCam.GetViewMatrix();
-		modelMat = glm::translate(modelMat, glm::vec3(movementAmt, movementAmt, -2.0f));
+		modelMat = glm::translate(modelMat, glm::vec3(0.0f, movementAmt, 0.0f));
 		modelMat = glm::rotate(modelMat, rotAmt, glm::vec3(1.0f, 1.0f, 0.0f));
 
 		shaderProgramUse(&texProgram);
 		textureUse(&moonman, 0);
 		textureUse(&moonman, 1);
-		shaderProgramSet(&texProgram, "material.diffuse", 0);
-		shaderProgramSet(&texProgram, "material.specular", 1);
-		shaderProgramSet(&texProgram, "material.shininess", 32.0f);
-		//shaderProgramSet(&texProgram, "light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-		shaderProgramSet(&texProgram, "light.position", lightPos + glm::vec3(0.0f, movementAmt, 0.0f));
-		shaderProgramSet(&texProgram, "light.ambient", glm::vec3(0.1f));
-		shaderProgramSet(&texProgram, "light.diffuse", glm::vec3(0.5f));
-		shaderProgramSet(&texProgram, "light.specular", glm::vec3(1.0f));
-		shaderProgramSet(&texProgram, "light.constant", 1.0f);
-		shaderProgramSet(&texProgram, "light.linear", 0.09f);
-		shaderProgramSet(&texProgram, "light.quadratic", 0.032f);
 		shaderProgramSet(&texProgram, "model", modelMat);
 		shaderProgramSet(&texProgram, "view", viewMat);
 		shaderProgramSet(&texProgram, "projection", projectionMat);
+		shaderProgramSet(&texProgram, "material.diffuse", 0);
+		shaderProgramSet(&texProgram, "material.specular", 1);
+		shaderProgramSet(&texProgram, "material.shininess", 32.0f);
+
+		shaderProgramSet(&texProgram, "dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+		shaderProgramSet(&texProgram, "dirLight.ambient", glm::vec3(0.1f));
+		shaderProgramSet(&texProgram, "dirLight.diffuse", glm::vec3(0.1f));
+		shaderProgramSet(&texProgram, "dirLight.specular", glm::vec3(0.1f));
+
+		shaderProgramSet(&texProgram, "pointLights[0].position", lightPositions[0] + glm::vec3(0.0f, movementAmt, 0.0f));
+		shaderProgramSet(&texProgram, "pointLights[0].color", lightColors[0]);
+		shaderProgramSet(&texProgram, "pointLights[0].ambient", glm::vec3(0.1f));
+		shaderProgramSet(&texProgram, "pointLights[0].diffuse", glm::vec3(0.4f));
+		shaderProgramSet(&texProgram, "pointLights[0].specular", glm::vec3(1.0f));
+		shaderProgramSet(&texProgram, "pointLights[0].constant", 1.0f);
+		shaderProgramSet(&texProgram, "pointLights[0].linear", 0.09f);
+		shaderProgramSet(&texProgram, "pointLights[0].quadratic", 0.032f);
+		shaderProgramSet(&texProgram, "pointLights[1].position", lightPositions[1] + glm::vec3(0.0f, movementAmt, 0.0f));
+		shaderProgramSet(&texProgram, "pointLights[1].color", glm::vec3(0.0f, 1.0f, 0.0f));
+		shaderProgramSet(&texProgram, "pointLights[1].color", lightColors[1]);
+		shaderProgramSet(&texProgram, "pointLights[1].ambient", glm::vec3(0.1f));
+		shaderProgramSet(&texProgram, "pointLights[1].diffuse", glm::vec3(0.4f));
+		shaderProgramSet(&texProgram, "pointLights[1].specular", glm::vec3(1.0f));
+		shaderProgramSet(&texProgram, "pointLights[1].constant", 1.0f);
+		shaderProgramSet(&texProgram, "pointLights[1].linear", 0.09f);
+		shaderProgramSet(&texProgram, "pointLights[1].quadratic", 0.032f);
+		shaderProgramSet(&texProgram, "pointLights[2].position", lightPositions[2] + glm::vec3(0.0f, movementAmt, 0.0f));
+		shaderProgramSet(&texProgram, "pointLights[2].color", glm::vec3(0.0f, 0.0f, 1.0f));
+		shaderProgramSet(&texProgram, "pointLights[2].color", lightColors[2]);
+		shaderProgramSet(&texProgram, "pointLights[2].ambient", glm::vec3(0.1f));
+		shaderProgramSet(&texProgram, "pointLights[2].diffuse", glm::vec3(0.4f));
+		shaderProgramSet(&texProgram, "pointLights[2].specular", glm::vec3(1.0f));
+		shaderProgramSet(&texProgram, "pointLights[2].constant", 1.0f);
+		shaderProgramSet(&texProgram, "pointLights[2].linear", 0.09f);
+		shaderProgramSet(&texProgram, "pointLights[2].quadratic", 0.032f);
+		shaderProgramSet(&texProgram, "pointLights[3].position", lightPositions[3] + glm::vec3(0.0f, movementAmt, 0.0f));
+		shaderProgramSet(&texProgram, "pointLights[3].color", lightColors[3]);
+		shaderProgramSet(&texProgram, "pointLights[3].ambient", glm::vec3(0.1f));
+		shaderProgramSet(&texProgram, "pointLights[3].diffuse", glm::vec3(0.4f));
+		shaderProgramSet(&texProgram, "pointLights[3].specular", glm::vec3(1.0f));
+		shaderProgramSet(&texProgram, "pointLights[3].constant", 1.0f);
+		shaderProgramSet(&texProgram, "pointLights[3].linear", 0.009f);
+		shaderProgramSet(&texProgram, "pointLights[3].quadratic", 0.0032f);
+		shaderProgramSet(&texProgram, "pointLights[4].position", lightPositions[4]);
+		shaderProgramSet(&texProgram, "pointLights[4].color", lightColors[4]);
+		shaderProgramSet(&texProgram, "pointLights[4].ambient", glm::vec3(0.1f));
+		shaderProgramSet(&texProgram, "pointLights[4].diffuse", glm::vec3(0.4f));
+		shaderProgramSet(&texProgram, "pointLights[4].specular", glm::vec3(1.0f));
+		shaderProgramSet(&texProgram, "pointLights[4].constant", 1.0f);
+		shaderProgramSet(&texProgram, "pointLights[4].linear", 0.009f);
+		shaderProgramSet(&texProgram, "pointLights[4].quadratic", 0.0032f);
+
+		shaderProgramSet(&texProgram, "spotLight.position", freeLookCam.Position);
+		shaderProgramSet(&texProgram, "spotLight.direction", freeLookCam.Front);
+		shaderProgramSet(&texProgram, "spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+		shaderProgramSet(&texProgram, "spotLight.color", glm::vec3(1.0f));
+		shaderProgramSet(&texProgram, "spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+		shaderProgramSet(&texProgram, "spotLight.ambient", glm::vec3(0.3f));
+		shaderProgramSet(&texProgram, "spotLight.diffuse", glm::vec3(0.5f));
+		shaderProgramSet(&texProgram, "spotLight.specular", glm::vec3(1.0f));
+		shaderProgramSet(&texProgram, "spotLight.constant", 1.0f);
+		shaderProgramSet(&texProgram, "spotLight.linear", 0.09f);
+		shaderProgramSet(&texProgram, "spotLight.quadratic", 0.032f);
 		modelRender(&cubeModel);
 
 		modelMat = glm::mat4();
@@ -147,14 +215,21 @@ int main()
 		shaderProgramSet(&texProgram, "projection", projectionMat);
 		modelRender(&planeModel);
 
-		shaderProgramUse(&lampProgram);
-		modelMat = glm::mat4();
-		modelMat = glm::translate(modelMat, lightPos + glm::vec3(0.0f, movementAmt, 0.0f));
-		modelMat = glm::scale(modelMat, glm::vec3(0.2f));
-		shaderProgramSet(&lampProgram, "model", modelMat);
-		shaderProgramSet(&lampProgram, "view", viewMat);
-		shaderProgramSet(&lampProgram, "projection", projectionMat);
-		modelRender(&lampCubeModel);
+		for (int i = 0; i < 5; i++)
+		{
+			shaderProgramUse(&lampProgram);
+			modelMat = glm::mat4();
+			if (i < 4)
+			{
+				modelMat = glm::translate(modelMat, lightPositions[i] + glm::vec3(0.0f, movementAmt, 0.0f));
+			}
+			modelMat = glm::scale(modelMat, glm::vec3(0.2f));
+			shaderProgramSet(&lampProgram, "model", modelMat);
+			shaderProgramSet(&lampProgram, "view", viewMat);
+			shaderProgramSet(&lampProgram, "projection", projectionMat);
+			shaderProgramSet(&lampProgram, "color", lightColors[i]);
+			modelRender(&lampModels[i]);
+		}
 
 		// Swap buffers
 		screenSwapAndPoll(&screen);
@@ -169,7 +244,8 @@ void cleanUp()
 {
 	modelFree(&planeModel);
 	modelFree(&cubeModel);
-	modelFree(&lampCubeModel);
+	for(int i = 0; i < NUM_LIGHTS; i++)
+		modelFree(&lampModels[i]);
 	textureFree(&container);
 	textureFree(&containerTwo);
 	textureFree(&containerTwoSpecular);

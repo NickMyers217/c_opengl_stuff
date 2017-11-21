@@ -95,7 +95,7 @@ public:
 		xoffset *= MouseSensitivity;
 		yoffset *= MouseSensitivity;
 
-		Yaw = std::fmod(Yaw += xoffset, 360.0);
+		Yaw = std::fmod(Yaw + xoffset, 360.0);
 		Pitch += yoffset;
 
 		// Make sure that when pitch is out of bounds, screen doesn't get flipped
