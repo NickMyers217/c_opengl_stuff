@@ -82,12 +82,12 @@ int main()
 	textureInit(&container, "container.jpg", false, false);
 	textureInit(&containerTwo, "container2.png", true, true);
 	textureInit(&containerTwoSpecular, "container2_specular.png", true, true);
-	textureInit(&moonman, "moonman.png", false, true);
+	textureInit(&moonman, "moonman.png", true, true);
 
 	float * planeVertices;
-	planeVertices = (GLfloat *)malloc(10 * 10 * (6 * 8) * sizeof(float));
-	generatePlaneVertices(planeVertices, 10, 10);
-	modelInit(&planeModel, planeVertices, 10 * 10 * (6 * 8));
+	planeVertices = (GLfloat *)malloc(20 * 20 * (6 * 8) * sizeof(float));
+	generatePlaneVertices(planeVertices, 20, 20);
+	modelInit(&planeModel, planeVertices, 20 * 20 * (6 * 8));
 	free(planeVertices);
 	modelInit(&cubeModel, CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
 	modelInit(&lampCubeModel, CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
@@ -120,24 +120,28 @@ int main()
 		modelMat = glm::rotate(modelMat, rotAmt, glm::vec3(1.0f, 1.0f, 0.0f));
 
 		shaderProgramUse(&texProgram);
-		textureUse(&containerTwo, 0);
-		textureUse(&containerTwoSpecular, 1);
+		textureUse(&moonman, 0);
+		textureUse(&moonman, 1);
 		shaderProgramSet(&texProgram, "material.diffuse", 0);
 		shaderProgramSet(&texProgram, "material.specular", 1);
 		shaderProgramSet(&texProgram, "material.shininess", 32.0f);
-		shaderProgramSet(&texProgram, "light.position", lightPos);
-		shaderProgramSet(&texProgram, "light.ambient", glm::vec3(0.2f));
+		//shaderProgramSet(&texProgram, "light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+		shaderProgramSet(&texProgram, "light.position", lightPos + glm::vec3(0.0f, movementAmt, 0.0f));
+		shaderProgramSet(&texProgram, "light.ambient", glm::vec3(0.1f));
 		shaderProgramSet(&texProgram, "light.diffuse", glm::vec3(0.5f));
 		shaderProgramSet(&texProgram, "light.specular", glm::vec3(1.0f));
+		shaderProgramSet(&texProgram, "light.constant", 1.0f);
+		shaderProgramSet(&texProgram, "light.linear", 0.09f);
+		shaderProgramSet(&texProgram, "light.quadratic", 0.032f);
 		shaderProgramSet(&texProgram, "model", modelMat);
 		shaderProgramSet(&texProgram, "view", viewMat);
 		shaderProgramSet(&texProgram, "projection", projectionMat);
 		modelRender(&cubeModel);
 
 		modelMat = glm::mat4();
-		modelMat = glm::translate(modelMat, glm::vec3(0.0f, -4.0f, 0.0f));
-		textureUse(&moonman, 0);
-		textureUse(&moonman, 1);
+		modelMat = glm::translate(modelMat, glm::vec3(0.0f, -2.0f, 0.0f));
+		textureUse(&containerTwo, 0);
+		textureUse(&containerTwoSpecular, 1);
 		shaderProgramSet(&texProgram, "model", modelMat);
 		shaderProgramSet(&texProgram, "view", viewMat);
 		shaderProgramSet(&texProgram, "projection", projectionMat);
@@ -145,7 +149,7 @@ int main()
 
 		shaderProgramUse(&lampProgram);
 		modelMat = glm::mat4();
-		modelMat = glm::translate(modelMat, lightPos);
+		modelMat = glm::translate(modelMat, lightPos + glm::vec3(0.0f, movementAmt, 0.0f));
 		modelMat = glm::scale(modelMat, glm::vec3(0.2f));
 		shaderProgramSet(&lampProgram, "model", modelMat);
 		shaderProgramSet(&lampProgram, "view", viewMat);
