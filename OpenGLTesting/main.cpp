@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory>
+#include <string>
 
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "screen.h"
-#include "camera.h"
-#include "shaderProgram.h"
+#include "Camera.h"
+#include "ShaderProgram.h"
 #include "texture.h"
 #include "cubeData.h"
 #include "planeData.h"
@@ -21,7 +21,6 @@
 // Global state
 Camera freeLookCam;
 Screen screen;
-ShaderProgram lampProgram, texProgram;
 Texture container, containerTwo, containerTwoSpecular, moonman;
 BaseModel planeModel, cubeModel;
 #define NUM_LIGHTS 5
@@ -78,8 +77,8 @@ int main()
 		return -1;
 	}
 
-	shaderProgramBuild(&lampProgram, "basic_vertex.glsl", "lamp_frag.glsl");
-	shaderProgramBuild(&texProgram, "basic_vertex.glsl", "texture_phong_frag.glsl");
+	ShaderProgram texProgram("basic_vertex.glsl", "texture_phong_frag.glsl");
+	ShaderProgram lampProgram("basic_vertex.glsl", "lamp_frag.glsl");
 
 	textureInit(&container, "container.jpg", false, false);
 	textureInit(&containerTwo, "container2.png", true, true);
@@ -135,99 +134,76 @@ int main()
 		modelMat = glm::translate(modelMat, glm::vec3(0.0f, movementAmt, 0.0f));
 		modelMat = glm::rotate(modelMat, rotAmt, glm::vec3(1.0f, 1.0f, 0.0f));
 
-		shaderProgramUse(&texProgram);
+		texProgram.Use();
 		textureUse(&moonman, 0);
 		textureUse(&moonman, 1);
-		shaderProgramSet(&texProgram, "model", modelMat);
-		shaderProgramSet(&texProgram, "view", viewMat);
-		shaderProgramSet(&texProgram, "projection", projectionMat);
-		shaderProgramSet(&texProgram, "material.diffuse", 0);
-		shaderProgramSet(&texProgram, "material.specular", 1);
-		shaderProgramSet(&texProgram, "material.shininess", 32.0f);
+		texProgram.SetUniform("model", modelMat);
+		texProgram.SetUniform("view", viewMat);
+		texProgram.SetUniform("projection", projectionMat);
+		texProgram.SetUniform("material.diffuse", 0);
+		texProgram.SetUniform("material.specular", 1);
+		texProgram.SetUniform("material.shininess", 32.0f);
 
-		shaderProgramSet(&texProgram, "dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-		shaderProgramSet(&texProgram, "dirLight.ambient", glm::vec3(0.1f));
-		shaderProgramSet(&texProgram, "dirLight.diffuse", glm::vec3(0.1f));
-		shaderProgramSet(&texProgram, "dirLight.specular", glm::vec3(0.1f));
+		texProgram.SetUniform("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+		texProgram.SetUniform("dirLight.ambient", glm::vec3(0.1f));
+		texProgram.SetUniform("dirLight.diffuse", glm::vec3(0.1f));
+		texProgram.SetUniform("dirLight.specular", glm::vec3(0.1f));
 
-		shaderProgramSet(&texProgram, "pointLights[0].position", lightPositions[0] + glm::vec3(0.0f, movementAmt, 0.0f));
-		shaderProgramSet(&texProgram, "pointLights[0].color", lightColors[0]);
-		shaderProgramSet(&texProgram, "pointLights[0].ambient", glm::vec3(0.1f));
-		shaderProgramSet(&texProgram, "pointLights[0].diffuse", glm::vec3(0.4f));
-		shaderProgramSet(&texProgram, "pointLights[0].specular", glm::vec3(1.0f));
-		shaderProgramSet(&texProgram, "pointLights[0].constant", 1.0f);
-		shaderProgramSet(&texProgram, "pointLights[0].linear", 0.09f);
-		shaderProgramSet(&texProgram, "pointLights[0].quadratic", 0.032f);
-		shaderProgramSet(&texProgram, "pointLights[1].position", lightPositions[1] + glm::vec3(0.0f, movementAmt, 0.0f));
-		shaderProgramSet(&texProgram, "pointLights[1].color", glm::vec3(0.0f, 1.0f, 0.0f));
-		shaderProgramSet(&texProgram, "pointLights[1].color", lightColors[1]);
-		shaderProgramSet(&texProgram, "pointLights[1].ambient", glm::vec3(0.1f));
-		shaderProgramSet(&texProgram, "pointLights[1].diffuse", glm::vec3(0.4f));
-		shaderProgramSet(&texProgram, "pointLights[1].specular", glm::vec3(1.0f));
-		shaderProgramSet(&texProgram, "pointLights[1].constant", 1.0f);
-		shaderProgramSet(&texProgram, "pointLights[1].linear", 0.09f);
-		shaderProgramSet(&texProgram, "pointLights[1].quadratic", 0.032f);
-		shaderProgramSet(&texProgram, "pointLights[2].position", lightPositions[2] + glm::vec3(0.0f, movementAmt, 0.0f));
-		shaderProgramSet(&texProgram, "pointLights[2].color", glm::vec3(0.0f, 0.0f, 1.0f));
-		shaderProgramSet(&texProgram, "pointLights[2].color", lightColors[2]);
-		shaderProgramSet(&texProgram, "pointLights[2].ambient", glm::vec3(0.1f));
-		shaderProgramSet(&texProgram, "pointLights[2].diffuse", glm::vec3(0.4f));
-		shaderProgramSet(&texProgram, "pointLights[2].specular", glm::vec3(1.0f));
-		shaderProgramSet(&texProgram, "pointLights[2].constant", 1.0f);
-		shaderProgramSet(&texProgram, "pointLights[2].linear", 0.09f);
-		shaderProgramSet(&texProgram, "pointLights[2].quadratic", 0.032f);
-		shaderProgramSet(&texProgram, "pointLights[3].position", lightPositions[3] + glm::vec3(0.0f, movementAmt, 0.0f));
-		shaderProgramSet(&texProgram, "pointLights[3].color", lightColors[3]);
-		shaderProgramSet(&texProgram, "pointLights[3].ambient", glm::vec3(0.1f));
-		shaderProgramSet(&texProgram, "pointLights[3].diffuse", glm::vec3(0.4f));
-		shaderProgramSet(&texProgram, "pointLights[3].specular", glm::vec3(1.0f));
-		shaderProgramSet(&texProgram, "pointLights[3].constant", 1.0f);
-		shaderProgramSet(&texProgram, "pointLights[3].linear", 0.009f);
-		shaderProgramSet(&texProgram, "pointLights[3].quadratic", 0.0032f);
-		shaderProgramSet(&texProgram, "pointLights[4].position", lightPositions[4]);
-		shaderProgramSet(&texProgram, "pointLights[4].color", lightColors[4]);
-		shaderProgramSet(&texProgram, "pointLights[4].ambient", glm::vec3(0.1f));
-		shaderProgramSet(&texProgram, "pointLights[4].diffuse", glm::vec3(0.4f));
-		shaderProgramSet(&texProgram, "pointLights[4].specular", glm::vec3(1.0f));
-		shaderProgramSet(&texProgram, "pointLights[4].constant", 1.0f);
-		shaderProgramSet(&texProgram, "pointLights[4].linear", 0.009f);
-		shaderProgramSet(&texProgram, "pointLights[4].quadratic", 0.0032f);
+		for (int i = 0; i < NUM_LIGHTS; i++)
+		{
+			std::string lightUniform = "pointLights[" + std::to_string(i) + "]";
+			if (i < 4)
+			{
+				texProgram.SetUniform((lightUniform + ".position").c_str(), lightPositions[i] + glm::vec3(0.0f, movementAmt, 0.0f));
+			}
+			else
+			{
+				texProgram.SetUniform((lightUniform + ".position").c_str(), lightPositions[i]);
+			}
+			texProgram.SetUniform((lightUniform + ".color").c_str(), lightColors[i]);
+			texProgram.SetUniform((lightUniform + ".ambient").c_str(), glm::vec3(0.1f));
+			texProgram.SetUniform((lightUniform + ".diffuse").c_str(), glm::vec3(0.4f));
+			texProgram.SetUniform((lightUniform + ".specular").c_str(), glm::vec3(1.0f));
+			texProgram.SetUniform((lightUniform + ".constant").c_str(), 1.0f);
+			texProgram.SetUniform((lightUniform + ".linear").c_str(), 0.09f);
+			texProgram.SetUniform((lightUniform + ".quadratic").c_str(), 0.032f);
+		}
 
-		shaderProgramSet(&texProgram, "spotLight.position", freeLookCam.Position);
-		shaderProgramSet(&texProgram, "spotLight.direction", freeLookCam.Front);
-		shaderProgramSet(&texProgram, "spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-		shaderProgramSet(&texProgram, "spotLight.color", glm::vec3(1.0f));
-		shaderProgramSet(&texProgram, "spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-		shaderProgramSet(&texProgram, "spotLight.ambient", glm::vec3(0.3f));
-		shaderProgramSet(&texProgram, "spotLight.diffuse", glm::vec3(0.5f));
-		shaderProgramSet(&texProgram, "spotLight.specular", glm::vec3(1.0f));
-		shaderProgramSet(&texProgram, "spotLight.constant", 1.0f);
-		shaderProgramSet(&texProgram, "spotLight.linear", 0.09f);
-		shaderProgramSet(&texProgram, "spotLight.quadratic", 0.032f);
+		texProgram.SetUniform("spotLight.position", freeLookCam.Position);
+		texProgram.SetUniform("spotLight.direction", freeLookCam.Front);
+		texProgram.SetUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+		texProgram.SetUniform("spotLight.color", glm::vec3(1.0f));
+		texProgram.SetUniform("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+		texProgram.SetUniform("spotLight.ambient", glm::vec3(0.3f));
+		texProgram.SetUniform("spotLight.diffuse", glm::vec3(0.5f));
+		texProgram.SetUniform("spotLight.specular", glm::vec3(1.0f));
+		texProgram.SetUniform("spotLight.constant", 1.0f);
+		texProgram.SetUniform("spotLight.linear", 0.09f);
+		texProgram.SetUniform("spotLight.quadratic", 0.032f);
 		modelRender(&cubeModel);
 
 		modelMat = glm::mat4();
 		modelMat = glm::translate(modelMat, glm::vec3(0.0f, -2.0f, 0.0f));
 		textureUse(&containerTwo, 0);
 		textureUse(&containerTwoSpecular, 1);
-		shaderProgramSet(&texProgram, "model", modelMat);
-		shaderProgramSet(&texProgram, "view", viewMat);
-		shaderProgramSet(&texProgram, "projection", projectionMat);
+		texProgram.SetUniform("model", modelMat);
+		texProgram.SetUniform("view", viewMat);
+		texProgram.SetUniform("projection", projectionMat);
 		modelRender(&planeModel);
 
 		for (int i = 0; i < 5; i++)
 		{
-			shaderProgramUse(&lampProgram);
+			lampProgram.Use();
 			modelMat = glm::mat4();
 			if (i < 4)
 			{
 				modelMat = glm::translate(modelMat, lightPositions[i] + glm::vec3(0.0f, movementAmt, 0.0f));
 			}
 			modelMat = glm::scale(modelMat, glm::vec3(0.2f));
-			shaderProgramSet(&lampProgram, "model", modelMat);
-			shaderProgramSet(&lampProgram, "view", viewMat);
-			shaderProgramSet(&lampProgram, "projection", projectionMat);
-			shaderProgramSet(&lampProgram, "color", lightColors[i]);
+			lampProgram.SetUniform("model", modelMat);
+			lampProgram.SetUniform("view", viewMat);
+			lampProgram.SetUniform("projection", projectionMat);
+			lampProgram.SetUniform("color", lightColors[i]);
 			modelRender(&lampModels[i]);
 		}
 
@@ -250,7 +226,5 @@ void cleanUp()
 	textureFree(&containerTwo);
 	textureFree(&containerTwoSpecular);
 	textureFree(&moonman);
-	shaderProgramFree(&lampProgram);
-	shaderProgramFree(&texProgram);
 	screenFree(&screen);
 }

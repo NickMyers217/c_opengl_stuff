@@ -4,29 +4,66 @@
 #include <string>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "utils.h"
 
 
-struct ShaderProgram {
-	GLuint id;
-};
-
 const std::string SHADER_PROGRAM_PATH = "../OpenGLTesting/res/shaders/";
 
 
-void compileShader(GLuint id, const char * shaderSource);
+class ShaderProgram {
+public:
+	GLuint Id;
 
-void shaderProgramBuild(ShaderProgram * program, const char * vertexShaderSource, const char * fragmentShaderSource);
-void shaderProgramUse(ShaderProgram * program);
-void shaderProgramFree(ShaderProgram * program);
-void shaderProgramSet(ShaderProgram * program, const char * uniform, int value);
-void shaderProgramSet(ShaderProgram * program, const char * uniform, float value);
-void shaderProgramSet(ShaderProgram * program, const char * uniform, glm::vec3& value);
-void shaderProgramSet(ShaderProgram * program, const char * uniform, glm::mat4& value);
+	ShaderProgram(const char * vertexShaderSource, const char * fragmentShaderSource);
+	~ShaderProgram();
+
+	void Use();
+	void SetUniform(const char * uniform, int value);
+	void SetUniform(const char * uniform, float value);
+	void SetUniform(const char * uniform, glm::vec3& value);
+	void SetUniform(const char * uniform, glm::mat4& value);
+
+private:
+	void CompileShader(GLuint id, const char * shaderSource);
+};
 
 
-void compileShader(GLuint id, const char * shaderSource)
+ShaderProgram::ShaderProgram(const char * vertexShaderName, const char * fragmentShaderName)
+{
+	std::string vertexShaderPath = SHADER_PROGRAM_PATH + vertexShaderName;
+	std::string fragmentShaderPath = SHADER_PROGRAM_PATH + fragmentShaderName;
+	std::string vertexShaderSource = readFileToString(vertexShaderPath.c_str());
+	std::string fragmentShaderSource = readFileToString(fragmentShaderPath.c_str());
+
+	GLuint vertId = glCreateShader(GL_VERTEX_SHADER);
+	GLuint fragId = glCreateShader(GL_FRAGMENT_SHADER);
+
+	CompileShader(vertId, vertexShaderSource.c_str());
+	CompileShader(fragId, fragmentShaderSource.c_str());
+
+	Id = glCreateProgram();
+	int  success;
+	char infoLog[512];
+	glAttachShader(Id, vertId);
+	glAttachShader(Id, fragId);
+	glLinkProgram(Id);
+	glGetProgramiv(Id, GL_LINK_STATUS, &success);
+	if (!success) {
+		glGetProgramInfoLog(Id, 512, NULL, infoLog);
+		printf("ERROR::SHADER::LINKING_FAILED\n%s\n", infoLog);
+	}
+	glDeleteShader(vertId);
+	glDeleteShader(fragId);
+}
+
+ShaderProgram::~ShaderProgram()
+{
+	glDeleteProgram(Id);
+}
+
+void ShaderProgram::CompileShader(GLuint id, const char * shaderSource)
 {
 	int  success;
 	char infoLog[512];
@@ -40,60 +77,27 @@ void compileShader(GLuint id, const char * shaderSource)
 	}
 }
 
-void shaderProgramBuild(ShaderProgram * program, const char * vertexShaderName, const char * fragmentShaderName)
+void ShaderProgram::Use()
 {
-	std::string vertexShaderPath = SHADER_PROGRAM_PATH + vertexShaderName;
-	std::string fragmentShaderPath = SHADER_PROGRAM_PATH + fragmentShaderName;
-	std::string vertexShaderSource = readFileToString(vertexShaderPath.c_str());
-	std::string fragmentShaderSource = readFileToString(fragmentShaderPath.c_str());
-
-	GLuint vertId = glCreateShader(GL_VERTEX_SHADER);
-	GLuint fragId = glCreateShader(GL_FRAGMENT_SHADER);
-
-	compileShader(vertId, vertexShaderSource.c_str());
-	compileShader(fragId, fragmentShaderSource.c_str());
-
-	program->id = glCreateProgram();
-	int  success;
-	char infoLog[512];
-	glAttachShader(program->id, vertId);
-	glAttachShader(program->id, fragId);
-	glLinkProgram(program->id);
-	glGetProgramiv(program->id, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(program->id, 512, NULL, infoLog);
-		printf("ERROR::SHADER::LINKING_FAILED\n%s\n", infoLog);
-	}
-	glDeleteShader(vertId);
-	glDeleteShader(fragId);
+	glUseProgram(Id);
 }
 
-void shaderProgramUse(ShaderProgram * program)
+inline void ShaderProgram::SetUniform(const char * uniform, int value)
 {
-	glUseProgram(program->id);
+	glUniform1i(glGetUniformLocation(Id, uniform), value);
 }
 
-void shaderProgramFree(ShaderProgram * program)
+inline void ShaderProgram::SetUniform(const char * uniform, float value)
 {
-	glDeleteProgram(program->id);
+	glUniform1f(glGetUniformLocation(Id, uniform), value);
 }
 
-inline void shaderProgramSet(ShaderProgram * program, const char * uniform, int value)
+inline void ShaderProgram::SetUniform(const char * uniform, glm::vec3& value)
 {
-	glUniform1i(glGetUniformLocation(program->id, uniform), value);
+	glUniform3f(glGetUniformLocation(Id, uniform), value.x, value.y, value.z);
 }
 
-inline void shaderProgramSet(ShaderProgram * program, const char * uniform, float value)
+inline void ShaderProgram::SetUniform(const char * uniform, glm::mat4& value)
 {
-	glUniform1f(glGetUniformLocation(program->id, uniform), value);
-}
-
-inline void shaderProgramSet(ShaderProgram * program, const char * uniform, glm::vec3& value)
-{
-	glUniform3f(glGetUniformLocation(program->id, uniform), value.x, value.y, value.z);
-}
-
-inline void shaderProgramSet(ShaderProgram * program, const char * uniform, glm::mat4& value)
-{
-	glUniformMatrix4fv(glGetUniformLocation(program->id, uniform), 1, GL_FALSE, glm::value_ptr(value));
+	glUniformMatrix4fv(glGetUniformLocation(Id, uniform), 1, GL_FALSE, glm::value_ptr(value));
 }

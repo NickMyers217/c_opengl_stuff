@@ -123,10 +123,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="baseModel.h" />
-    <ClInclude Include="camera.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="cubeData.h" />
     <ClInclude Include="planeData.h" />
-    <ClInclude Include="shaderProgram.h" />
+    <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="utils.h" />
