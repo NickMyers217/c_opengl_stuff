@@ -36,12 +36,15 @@ void modelInit(BaseModel * model, const GLfloat * buffer, unsigned int bufferLen
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), (void *)(6 * sizeof(GL_FLOAT)));
 	glEnableVertexAttribArray(2);
+
+	glBindVertexArray(0);
 }
 
 void modelRender(BaseModel * model)
 {
 	glBindVertexArray(model->vaoId);
 	glDrawArrays(GL_TRIANGLES, 0, model->bufferLength);
+	glBindVertexArray(0);
 }
 
 void modelFree(BaseModel * model)

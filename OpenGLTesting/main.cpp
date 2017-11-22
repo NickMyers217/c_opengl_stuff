@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
@@ -15,21 +16,19 @@
 #include "cubeData.h"
 #include "planeData.h"
 #include "baseModel.h"
+#include "Mesh.h"
 
 
-// TODO: can i get rid of this at some point? is it even worth it?
+using namespace std;
+
+
 // Global state
 Camera freeLookCam;
 Screen screen;
-Texture container, containerTwo, containerTwoSpecular, moonman;
-BaseModel planeModel, cubeModel;
-#define NUM_LIGHTS 5
-BaseModel lampModels[NUM_LIGHTS];
 
 
 void mouse_callback(GLFWwindow * window, double xpos, double ypos);
 void processInput(GLFWwindow * window, double deltaTime);
-void cleanUp();
 
 
 void mouse_callback(GLFWwindow * window, double xpos, double ypos)
@@ -77,24 +76,41 @@ int main()
 		return -1;
 	}
 
-	ShaderProgram texProgram("basic_vertex.glsl", "texture_phong_frag.glsl");
+	freeLookCam.Position = glm::vec3(0.0f, 0.0f, 10.0f);
+
 	ShaderProgram lampProgram("basic_vertex.glsl", "lamp_frag.glsl");
+	ShaderProgram texProgram("basic_vertex.glsl", "texture_phong_frag.glsl");
 
-	textureInit(&container, "container.jpg", false, false);
-	textureInit(&containerTwo, "container2.png", true, true);
-	textureInit(&containerTwoSpecular, "container2_specular.png", true, true);
-	textureInit(&moonman, "moonman.png", true, true);
+	Texture container, containerTwo, containerTwoSpecular, moonman;
+	textureInit(&container, "container.jpg", DIFFUSE_AND_SPECULAR);
+	textureInit(&moonman, "moonman.png", DIFFUSE_AND_SPECULAR, true, true);
+	textureInit(&containerTwo, "container2.png", DIFFUSE, true, true);
+	textureInit(&containerTwoSpecular, "container2_specular.png", SPECULAR, true, true);
 
-	float * planeVertices;
-	planeVertices = (GLfloat *)malloc(20 * 20 * (6 * 8) * sizeof(float));
-	generatePlaneVertices(planeVertices, 20, 20);
-	modelInit(&planeModel, planeVertices, 20 * 20 * (6 * 8));
-	free(planeVertices);
-	modelInit(&cubeModel, CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
-	for (int i = 0; i < NUM_LIGHTS; i++)
-		modelInit(&lampModels[i], CUBE_VERTICES, sizeof(CUBE_VERTICES) / sizeof(GLfloat));
+	vector<Vertex> planeVertices;
+	vector<GLuint> planeIndices;
+	generatePlaneData(planeVertices, planeIndices, 20, 20);
+	vector<Texture> planeTextures;
+	planeTextures.push_back(moonman);
+	Mesh planeMesh(planeVertices, planeIndices, planeTextures);
 
-	glm::mat4 projectionMat = glm::perspective(glm::radians(freeLookCam.GetFov()), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+	vector<Vertex> cubeVertices;
+	vector<GLuint> cubeIndices;
+	generateCubeData(cubeVertices, cubeIndices);
+
+	vector<Texture> cubeTextures;
+	cubeTextures.push_back(containerTwo);
+	cubeTextures.push_back(containerTwoSpecular);
+	Mesh containerMesh(cubeVertices, cubeIndices, cubeTextures);
+
+	#define NUM_LIGHTS 5
+	Mesh lampMeshes[NUM_LIGHTS] = {
+		Mesh(cubeVertices, cubeIndices, vector<Texture>()),
+		Mesh(cubeVertices, cubeIndices, vector<Texture>()),
+		Mesh(cubeVertices, cubeIndices, vector<Texture>()),
+		Mesh(cubeVertices, cubeIndices, vector<Texture>()),
+		Mesh(cubeVertices, cubeIndices, vector<Texture>()),
+	};
 	glm::vec3 lightPositions[NUM_LIGHTS] = {
 		glm::vec3(-8.0f, 1.0f,  8.0f),
 		glm::vec3(-8.0f, 1.0f, -8.0f),
@@ -109,6 +125,8 @@ int main()
 		glm::vec3(0.0f, 1.0f, 1.0f),
 		glm::vec3(1.0f, 1.0f, 1.0f),
 	};
+
+	glm::mat4 projectionMat = glm::perspective(glm::radians(freeLookCam.GetFov()), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
 	double deltaTime = 0.0f;
 	double lastFrame = 0.0f;
@@ -131,24 +149,28 @@ int main()
 		float rotAmt = sin((float)glfwGetTime() * 0.5f + 1.0f);
 		glm::mat4 modelMat;
 		glm::mat4 viewMat = freeLookCam.GetViewMatrix();
-		modelMat = glm::translate(modelMat, glm::vec3(0.0f, movementAmt, 0.0f));
-		modelMat = glm::rotate(modelMat, rotAmt, glm::vec3(1.0f, 1.0f, 0.0f));
+
+		lampProgram.Use();
+		for (int i = 0; i < NUM_LIGHTS; i++)
+		{
+			modelMat = glm::mat4();
+			if (i < 4)
+			{
+				modelMat = glm::translate(modelMat, lightPositions[i] + glm::vec3(0.0f, movementAmt, 0.0f));
+			}
+			modelMat = glm::scale(modelMat, glm::vec3(0.2f));
+			lampProgram.SetUniform("model", modelMat);
+			lampProgram.SetUniform("view", viewMat);
+			lampProgram.SetUniform("projection", projectionMat);
+			lampProgram.SetUniform("color", lightColors[i]);
+			lampMeshes[i].Draw(lampProgram);
+		}
 
 		texProgram.Use();
-		textureUse(&moonman, 0);
-		textureUse(&moonman, 1);
-		texProgram.SetUniform("model", modelMat);
-		texProgram.SetUniform("view", viewMat);
-		texProgram.SetUniform("projection", projectionMat);
-		texProgram.SetUniform("material.diffuse", 0);
-		texProgram.SetUniform("material.specular", 1);
-		texProgram.SetUniform("material.shininess", 32.0f);
-
 		texProgram.SetUniform("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
 		texProgram.SetUniform("dirLight.ambient", glm::vec3(0.1f));
 		texProgram.SetUniform("dirLight.diffuse", glm::vec3(0.1f));
 		texProgram.SetUniform("dirLight.specular", glm::vec3(0.1f));
-
 		for (int i = 0; i < NUM_LIGHTS; i++)
 		{
 			std::string lightUniform = "pointLights[" + std::to_string(i) + "]";
@@ -168,7 +190,6 @@ int main()
 			texProgram.SetUniform((lightUniform + ".linear").c_str(), 0.09f);
 			texProgram.SetUniform((lightUniform + ".quadratic").c_str(), 0.032f);
 		}
-
 		texProgram.SetUniform("spotLight.position", freeLookCam.Position);
 		texProgram.SetUniform("spotLight.direction", freeLookCam.Front);
 		texProgram.SetUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
@@ -180,51 +201,32 @@ int main()
 		texProgram.SetUniform("spotLight.constant", 1.0f);
 		texProgram.SetUniform("spotLight.linear", 0.09f);
 		texProgram.SetUniform("spotLight.quadratic", 0.032f);
-		modelRender(&cubeModel);
 
 		modelMat = glm::mat4();
 		modelMat = glm::translate(modelMat, glm::vec3(0.0f, -2.0f, 0.0f));
-		textureUse(&containerTwo, 0);
-		textureUse(&containerTwoSpecular, 1);
+		texProgram.SetUniform("material.shininess", 32.0f);
 		texProgram.SetUniform("model", modelMat);
 		texProgram.SetUniform("view", viewMat);
 		texProgram.SetUniform("projection", projectionMat);
-		modelRender(&planeModel);
+		planeMesh.Draw(texProgram);
 
-		for (int i = 0; i < 5; i++)
-		{
-			lampProgram.Use();
-			modelMat = glm::mat4();
-			if (i < 4)
-			{
-				modelMat = glm::translate(modelMat, lightPositions[i] + glm::vec3(0.0f, movementAmt, 0.0f));
-			}
-			modelMat = glm::scale(modelMat, glm::vec3(0.2f));
-			lampProgram.SetUniform("model", modelMat);
-			lampProgram.SetUniform("view", viewMat);
-			lampProgram.SetUniform("projection", projectionMat);
-			lampProgram.SetUniform("color", lightColors[i]);
-			modelRender(&lampModels[i]);
-		}
+		modelMat = glm::mat4();
+		modelMat = glm::translate(modelMat, glm::vec3(0.0f, 2.0f, movementAmt * 3.0f));
+		modelMat = glm::rotate(modelMat, rotAmt, glm::vec3(1.0f, 1.0f, 0.0f));
+		texProgram.SetUniform("material.shininess", 32.0f);
+		texProgram.SetUniform("model", modelMat);
+		texProgram.SetUniform("view", viewMat);
+		texProgram.SetUniform("projection", projectionMat);
+		containerMesh.Draw(texProgram);
 
 		// Swap buffers
 		screenSwapAndPoll(&screen);
 	}
 
-	cleanUp();
-	return 0;
-}
-
-
-void cleanUp()
-{
-	modelFree(&planeModel);
-	modelFree(&cubeModel);
-	for(int i = 0; i < NUM_LIGHTS; i++)
-		modelFree(&lampModels[i]);
 	textureFree(&container);
 	textureFree(&containerTwo);
 	textureFree(&containerTwoSpecular);
 	textureFree(&moonman);
 	screenFree(&screen);
+	return 0;
 }

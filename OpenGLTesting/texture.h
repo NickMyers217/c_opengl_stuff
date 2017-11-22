@@ -7,20 +7,28 @@
 #include "stb_image.h"
 
 
-struct Texture {
-	GLuint id;
-};
-
 const std::string TEXTURE_PATH = "../OpenGLTesting/res/textures/";
 
+enum TextureType {
+	DIFFUSE,
+	SPECULAR,
+	DIFFUSE_AND_SPECULAR
+};
 
-void textureInit(Texture * texture, const char * textureName, bool flipY, bool isPng);
+struct Texture {
+	GLuint id;
+	TextureType type;
+};
+
+
+void textureInit(Texture * texture, const char * textureName, TextureType type, bool flipY = false, bool isPng = false);
 void textureUse(Texture * texture, GLuint slot);
 void textureFree(Texture * texture);
 
 
-void textureInit(Texture * texture, const char * textureName, bool flipY, bool isPng)
+void textureInit(Texture * texture, const char * textureName, TextureType type, bool flipY, bool isPng)
 {
+	texture->type = type;
 	glGenTextures(1, &texture->id);
 	glBindTexture(GL_TEXTURE_2D, texture->id);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -47,6 +55,7 @@ void textureUse(Texture * texture, GLuint slot)
 {
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, texture->id);
+	glActiveTexture(GL_TEXTURE0);
 }
 
 void textureFree(Texture * texture)

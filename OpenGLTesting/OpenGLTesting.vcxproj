@@ -125,6 +125,7 @@
     <ClInclude Include="baseModel.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="cubeData.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="planeData.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="stb_image.h" />

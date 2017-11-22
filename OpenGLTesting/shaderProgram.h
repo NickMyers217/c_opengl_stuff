@@ -82,22 +82,22 @@ void ShaderProgram::Use()
 	glUseProgram(Id);
 }
 
-inline void ShaderProgram::SetUniform(const char * uniform, int value)
+void ShaderProgram::SetUniform(const char * uniform, int value)
 {
 	glUniform1i(glGetUniformLocation(Id, uniform), value);
 }
 
-inline void ShaderProgram::SetUniform(const char * uniform, float value)
+void ShaderProgram::SetUniform(const char * uniform, float value)
 {
 	glUniform1f(glGetUniformLocation(Id, uniform), value);
 }
 
-inline void ShaderProgram::SetUniform(const char * uniform, glm::vec3& value)
+void ShaderProgram::SetUniform(const char * uniform, glm::vec3& value)
 {
 	glUniform3f(glGetUniformLocation(Id, uniform), value.x, value.y, value.z);
 }
 
-inline void ShaderProgram::SetUniform(const char * uniform, glm::mat4& value)
+void ShaderProgram::SetUniform(const char * uniform, glm::mat4& value)
 {
 	glUniformMatrix4fv(glGetUniformLocation(Id, uniform), 1, GL_FALSE, glm::value_ptr(value));
 }
