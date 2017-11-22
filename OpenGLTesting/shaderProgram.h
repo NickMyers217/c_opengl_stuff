@@ -17,7 +17,6 @@ public:
 	GLuint Id;
 
 	ShaderProgram(const char * vertexShaderSource, const char * fragmentShaderSource);
-	~ShaderProgram();
 
 	void Use();
 	void SetUniform(const char * uniform, int value);
@@ -56,11 +55,6 @@ ShaderProgram::ShaderProgram(const char * vertexShaderName, const char * fragmen
 	}
 	glDeleteShader(vertId);
 	glDeleteShader(fragId);
-}
-
-ShaderProgram::~ShaderProgram()
-{
-	glDeleteProgram(Id);
 }
 
 void ShaderProgram::CompileShader(GLuint id, const char * shaderSource)

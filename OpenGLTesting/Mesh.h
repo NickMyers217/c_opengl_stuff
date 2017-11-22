@@ -1,12 +1,12 @@
 #pragma once
 
+#include "texture.h"
+#include "ShaderProgram.h"
+
 #include <string>
 #include <vector>
 #include <glad\glad.h>
 #include <glm\glm.hpp>
-
-#include "texture.h"
-#include "ShaderProgram.h"
 
 using namespace std;
 
@@ -26,8 +26,6 @@ public:
 
 	Mesh(vector<Vertex>& vertices, vector<Texture>& textures);
 	Mesh(vector<Vertex>& vertices, vector<GLuint>& indices, vector<Texture>& textures);
-
-	~Mesh();
 
 	void Draw(ShaderProgram& shader);
 private:
@@ -54,13 +52,6 @@ Mesh::Mesh(vector<Vertex>& vertices, vector<GLuint>& indices, vector<Texture>& t
 	Textures = textures;
 
 	InitializeMesh();
-}
-
-Mesh::~Mesh()
-{
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
 }
 
 void Mesh::InitializeMesh()

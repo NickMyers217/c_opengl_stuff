@@ -1,8 +1,9 @@
 #pragma once
 
+#include "Mesh.h"
+
 #include <vector>
 
-#include "Mesh.h"
 
 using namespace std;
 

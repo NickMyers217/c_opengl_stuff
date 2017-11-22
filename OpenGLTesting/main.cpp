@@ -1,3 +1,13 @@
+#include "screen.h"
+#include "Camera.h"
+#include "ShaderProgram.h"
+#include "texture.h"
+#include "cubeData.h"
+#include "planeData.h"
+#include "Model.h"
+#include "Mesh.h"
+#include "utils.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory>
@@ -8,15 +18,6 @@
 #include <GLFW\glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-#include "screen.h"
-#include "Camera.h"
-#include "ShaderProgram.h"
-#include "texture.h"
-#include "cubeData.h"
-#include "planeData.h"
-#include "baseModel.h"
-#include "Mesh.h"
 
 
 using namespace std;
@@ -81,8 +82,8 @@ int main()
 	ShaderProgram lampProgram("basic_vertex.glsl", "lamp_frag.glsl");
 	ShaderProgram texProgram("basic_vertex.glsl", "texture_phong_frag.glsl");
 
-	Texture container, containerTwo, containerTwoSpecular, moonman;
-	textureInit(&container, "container.jpg", DIFFUSE_AND_SPECULAR);
+	Texture joey, containerTwo, containerTwoSpecular, moonman;
+	textureInit(&joey, "joey.jpg", DIFFUSE_AND_SPECULAR, true);
 	textureInit(&moonman, "moonman.png", DIFFUSE_AND_SPECULAR, true, true);
 	textureInit(&containerTwo, "container2.png", DIFFUSE, true, true);
 	textureInit(&containerTwoSpecular, "container2_specular.png", SPECULAR, true, true);
@@ -125,6 +126,9 @@ int main()
 		glm::vec3(0.0f, 1.0f, 1.0f),
 		glm::vec3(1.0f, 1.0f, 1.0f),
 	};
+
+	Model nanosuit("C:/Users/Boromir/Downloads/nanosuit/nanosuit.obj");
+	Model suzanne("C:/Program Files/Assimp/test/models/BLEND/Suzanne_248.blend");
 
 	glm::mat4 projectionMat = glm::perspective(glm::radians(freeLookCam.GetFov()), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
 
@@ -203,6 +207,15 @@ int main()
 		texProgram.SetUniform("spotLight.quadratic", 0.032f);
 
 		modelMat = glm::mat4();
+		modelMat = glm::translate(modelMat, glm::vec3(0.0f, -2.0f, -5.0f));
+		modelMat = glm::scale(modelMat, glm::vec3(0.25f));
+		texProgram.SetUniform("material.shininess", 32.0f);
+		texProgram.SetUniform("model", modelMat);
+		texProgram.SetUniform("view", viewMat);
+		texProgram.SetUniform("projection", projectionMat);
+		nanosuit.Draw(texProgram);
+
+		modelMat = glm::mat4();
 		modelMat = glm::translate(modelMat, glm::vec3(0.0f, -2.0f, 0.0f));
 		texProgram.SetUniform("material.shininess", 32.0f);
 		texProgram.SetUniform("model", modelMat);
@@ -211,7 +224,7 @@ int main()
 		planeMesh.Draw(texProgram);
 
 		modelMat = glm::mat4();
-		modelMat = glm::translate(modelMat, glm::vec3(0.0f, 2.0f, movementAmt * 3.0f));
+		modelMat = glm::translate(modelMat, glm::vec3(movementAmt * 2.0f, 2.0f, 0.0f));
 		modelMat = glm::rotate(modelMat, rotAmt, glm::vec3(1.0f, 1.0f, 0.0f));
 		texProgram.SetUniform("material.shininess", 32.0f);
 		texProgram.SetUniform("model", modelMat);
@@ -219,11 +232,22 @@ int main()
 		texProgram.SetUniform("projection", projectionMat);
 		containerMesh.Draw(texProgram);
 
+		modelMat = glm::mat4();
+		modelMat = glm::translate(modelMat, glm::vec3(0.0f, 2.0f, 10.0f + movementAmt * 1.5f));
+		modelMat = glm::rotate(modelMat, -90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+		texProgram.SetUniform("material.shininess", 32.0f);
+		texProgram.SetUniform("model", modelMat);
+		texProgram.SetUniform("view", viewMat);
+		texProgram.SetUniform("projection", projectionMat);
+		suzanne.Draw(texProgram);
+
 		// Swap buffers
 		screenSwapAndPoll(&screen);
 	}
 
-	textureFree(&container);
+	glCheckError();
+
+	textureFree(&joey);
 	textureFree(&containerTwo);
 	textureFree(&containerTwoSpecular);
 	textureFree(&moonman);

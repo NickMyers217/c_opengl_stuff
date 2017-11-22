@@ -1,10 +1,10 @@
 #pragma once
 
+#include "stb_image.h"
+
 #include <string>
 #include <stdio.h>
 #include <glad\glad.h>
-
-#include "stb_image.h"
 
 
 const std::string TEXTURE_PATH = "../OpenGLTesting/res/textures/";
@@ -18,6 +18,7 @@ enum TextureType {
 struct Texture {
 	GLuint id;
 	TextureType type;
+	std::string path;
 };
 
 
@@ -33,7 +34,7 @@ void textureInit(Texture * texture, const char * textureName, TextureType type, 
 	glBindTexture(GL_TEXTURE_2D, texture->id);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	int width, height, nrChannels;
 	std::string imagePath = TEXTURE_PATH + textureName;
