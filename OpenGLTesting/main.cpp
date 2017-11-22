@@ -32,42 +32,6 @@ void mouse_callback(GLFWwindow * window, double xpos, double ypos);
 void processInput(GLFWwindow * window, double deltaTime);
 
 
-void mouse_callback(GLFWwindow * window, double xpos, double ypos)
-{
-	if (!screen.mouseCaptured)
-	{
-		screen.lastX = xpos;
-		screen.lastY = ypos;
-		screen.mouseCaptured = true;
-	}
-
-	float xOff = xpos - screen.lastX;
-	float yOff = screen.lastY - ypos;
-	screen.lastX = xpos;
-	screen.lastY = ypos;
-
-	freeLookCam.ProcessMouseMovement(xOff, yOff);
-}
-
-void processInput(GLFWwindow * window, double deltaTime)
-{
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-	if (glfwGetKey(window, GLFW_KEY_F9) == GLFW_PRESS)
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	if (glfwGetKey(window, GLFW_KEY_F10) == GLFW_PRESS)
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		freeLookCam.ProcessKeyboard(FORWARD, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		freeLookCam.ProcessKeyboard(BACKWARD, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		freeLookCam.ProcessKeyboard(LEFT, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		freeLookCam.ProcessKeyboard(RIGHT, deltaTime);
-}
-
 int main()
 {
 	// Screen initialization
@@ -254,3 +218,41 @@ int main()
 	screenFree(&screen);
 	return 0;
 }
+
+
+void mouse_callback(GLFWwindow * window, double xpos, double ypos)
+{
+	if (!screen.mouseCaptured)
+	{
+		screen.lastX = xpos;
+		screen.lastY = ypos;
+		screen.mouseCaptured = true;
+	}
+
+	float xOff = xpos - screen.lastX;
+	float yOff = screen.lastY - ypos;
+	screen.lastX = xpos;
+	screen.lastY = ypos;
+
+	freeLookCam.ProcessMouseMovement(xOff, yOff);
+}
+
+void processInput(GLFWwindow * window, double deltaTime)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+	if (glfwGetKey(window, GLFW_KEY_F9) == GLFW_PRESS)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	if (glfwGetKey(window, GLFW_KEY_F10) == GLFW_PRESS)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		freeLookCam.ProcessKeyboard(FORWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		freeLookCam.ProcessKeyboard(BACKWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		freeLookCam.ProcessKeyboard(LEFT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		freeLookCam.ProcessKeyboard(RIGHT, deltaTime);
+}
+
