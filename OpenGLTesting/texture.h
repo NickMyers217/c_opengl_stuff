@@ -6,10 +6,13 @@
 #include <stdio.h>
 #include <glad\glad.h>
 
+using namespace std;
 
-const std::string TEXTURE_PATH = "../OpenGLTesting/res/textures/";
 
-enum TextureType {
+static const std::string TEXTURE_PATH = "../OpenGLTesting/res/textures/";
+
+
+enum class TextureType {
 	DIFFUSE,
 	SPECULAR,
 	DIFFUSE_AND_SPECULAR
@@ -18,7 +21,7 @@ enum TextureType {
 struct Texture {
 	GLuint id;
 	TextureType type;
-	std::string path;
+	string path;
 };
 
 
@@ -30,6 +33,7 @@ void textureFree(Texture * texture);
 void textureInit(Texture * texture, const char * textureName, TextureType type, bool flipY, bool isPng)
 {
 	texture->type = type;
+	texture->path = TEXTURE_PATH + textureName;
 	glGenTextures(1, &texture->id);
 	glBindTexture(GL_TEXTURE_2D, texture->id);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -37,9 +41,8 @@ void textureInit(Texture * texture, const char * textureName, TextureType type, 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	int width, height, nrChannels;
-	std::string imagePath = TEXTURE_PATH + textureName;
 	stbi_set_flip_vertically_on_load(flipY);
-	unsigned char * data = stbi_load(imagePath.c_str(), &width, &height, &nrChannels, 0);
+	unsigned char * data = stbi_load(texture->path.c_str(), &width, &height, &nrChannels, 0);
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, isPng ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data);

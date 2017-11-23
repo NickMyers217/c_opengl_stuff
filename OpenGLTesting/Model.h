@@ -38,7 +38,7 @@ private:
 
 	void LoadModel(string path);
 	void ProcessNode(aiNode * node, const aiScene * scene);
-	void ProcessMesh(aiMesh * mesh, const aiScene * scene);
+	Mesh ProcessMesh(aiMesh * mesh, const aiScene * scene);
 	vector<Texture> LoadMaterialTextures(aiMaterial * mat, aiTextureType assimpType, TextureType ourType);
 	unsigned int Model::TextureFromFile(const char * path, const string& directory);
 };
@@ -64,7 +64,7 @@ void Model::ProcessNode(aiNode * node, const aiScene * scene)
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh * mesh = scene->mMeshes[node->mMeshes[i]];
-		ProcessMesh(mesh, scene);
+		Meshes.push_back(ProcessMesh(mesh, scene));
 	}
 
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -73,7 +73,7 @@ void Model::ProcessNode(aiNode * node, const aiScene * scene)
 	}
 }
 
-void Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
+Mesh Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 {
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;
@@ -125,14 +125,14 @@ void Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 	{
 		aiMaterial * material = scene->mMaterials[mesh->mMaterialIndex];
 
-		vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, DIFFUSE);
-		vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, SPECULAR);
+		vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, TextureType::DIFFUSE);
+		vector<Texture> specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, TextureType::SPECULAR);
 
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
-	Meshes.push_back(Mesh(vertices, indices, textures));
+	return Mesh(vertices, indices, textures);
 }
 
 

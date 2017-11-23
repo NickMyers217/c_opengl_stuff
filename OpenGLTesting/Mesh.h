@@ -8,7 +8,9 @@
 #include <glad\glad.h>
 #include <glm\glm.hpp>
 
+
 using namespace std;
+
 
 struct Vertex {
 	glm::vec3 Position;
@@ -94,19 +96,19 @@ void Mesh::Draw(ShaderProgram& shader)
 
 		switch (type)
 		{
-		case DIFFUSE:
+		case TextureType::DIFFUSE:
 			name = "texture_diffuse";
 			number = std::to_string(diffuseCount++);
 			shader.SetUniform(("material." + name + number).c_str(), textureSlot);
 			textureUse(&Textures[i], textureSlot++);
 			break;
-		case SPECULAR:
+		case TextureType::SPECULAR:
 			name = "texture_specular";
 			number = std::to_string(specularCount++);
 			shader.SetUniform(("material." + name + number).c_str(), textureSlot);
 			textureUse(&Textures[i], textureSlot++);
 			break;
-		case DIFFUSE_AND_SPECULAR:
+		case TextureType::DIFFUSE_AND_SPECULAR:
 			string numberDiff = std::to_string(diffuseCount++);
 			string numberSpec = std::to_string(specularCount++);
 			shader.SetUniform(("material.texture_diffuse" + numberDiff).c_str(), textureSlot);

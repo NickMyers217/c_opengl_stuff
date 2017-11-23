@@ -48,24 +48,26 @@ int main()
 	ShaderProgram texProgram("basic_vertex.glsl", "texture_phong_frag.glsl");
 
 	Texture joey, containerTwo, containerTwoSpecular, moonman;
-	textureInit(&joey, "joey.jpg", DIFFUSE_AND_SPECULAR, true);
-	textureInit(&moonman, "moonman.png", DIFFUSE_AND_SPECULAR, true, true);
-	textureInit(&containerTwo, "container2.png", DIFFUSE, true, true);
-	textureInit(&containerTwoSpecular, "container2_specular.png", SPECULAR, true, true);
+	textureInit(&joey, "joey.jpg", TextureType::DIFFUSE_AND_SPECULAR, true);
+	textureInit(&moonman, "moonman.png", TextureType::DIFFUSE_AND_SPECULAR, true, true);
+	textureInit(&containerTwo, "container2.png", TextureType::DIFFUSE, true, true);
+	textureInit(&containerTwoSpecular, "container2_specular.png", TextureType::SPECULAR, true, true);
 
 	vector<Vertex> planeVertices;
 	vector<GLuint> planeIndices;
 	generatePlaneData(planeVertices, planeIndices, 20, 20);
-	vector<Texture> planeTextures;
-	planeTextures.push_back(moonman);
+	vector<Texture> planeTextures = {
+		moonman
+	};
 	Mesh planeMesh(planeVertices, planeIndices, planeTextures);
 
 	vector<Vertex> cubeVertices;
 	vector<GLuint> cubeIndices;
 	generateCubeData(cubeVertices, cubeIndices);
-	vector<Texture> cubeTextures;
-	cubeTextures.push_back(containerTwo);
-	cubeTextures.push_back(containerTwoSpecular);
+	vector<Texture> cubeTextures = {
+		containerTwo,
+		containerTwoSpecular
+	};
 	Mesh containerMesh(cubeVertices, cubeIndices, cubeTextures);
 
 	#define NUM_LIGHTS 5
@@ -94,12 +96,21 @@ int main()
 	for (unsigned int i = 0; i < NUM_LIGHTS; i++)
 		pointLights[i] = Light::PointLight(lightPositions[i], lightColors[i]);
 	Light dirLight = Light::DirectionalLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(1.0f));
-	Light spotLight = Light::SpotLight(glm::vec3(0.0f), glm::vec3(0.0f));
+	Light spotLight = Light::SpotLight(
+		glm::vec3(0.0f),
+		glm::vec3(0.0f),
+		glm::vec3(1.0f),
+		glm::vec3(0.5f),
+		glm::vec3(1.0f),
+		glm::vec3(1.0f),
+		1.0f, 0.9f, 0.32f,
+		glm::cos(glm::radians(20.0f)),
+		glm::cos(glm::radians(25.0f)));
 
 	Model nanosuit("C:/Users/Boromir/Downloads/nanosuit/nanosuit.obj");
 	Model suzanne("C:/Program Files/Assimp/test/models/BLEND/Suzanne_248.blend");
 
-	glm::mat4 projectionMat = glm::perspective(glm::radians(freeLookCam.GetFov()), (float)WIDTH / (float)HEIGHT, 0.1f, 100.0f);
+	glm::mat4 projectionMat = glm::perspective(glm::radians(freeLookCam.GetFov()), (float)screen.width / (float)screen.height, 0.1f, 100.0f);
 
 	double deltaTime = 0.0f;
 	double lastFrame = 0.0f;
@@ -179,6 +190,7 @@ int main()
 		texProgram.SetUniform("projection", projectionMat);
 		containerMesh.Draw(texProgram);
 
+		// TODO: consider moving Material and Transformation data be part of the Model/Mesh
 		modelMat = glm::mat4();
 		modelMat = glm::translate(modelMat, glm::vec3(0.0f, 2.0f, 10.0f + movementAmt * 1.5f));
 		modelMat = glm::rotate(modelMat, -90.0f, glm::vec3(1.0f, 0.0f, 0.0f));

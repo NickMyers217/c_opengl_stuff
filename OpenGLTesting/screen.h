@@ -9,11 +9,8 @@ struct Screen {
 	GLFWwindow * window;
 	float lastX, lastY;
 	bool mouseCaptured;
+	int width, height;
 };
-
-const int WIDTH = 1600;
-const int HEIGHT = 900;
-const int FPS = 120;
 
 
 void printMajorAndMinorGlVersion();
@@ -34,25 +31,27 @@ void printMajorAndMinorGlVersion()
 
 int screenInit(Screen * screen, GLFWcursorposfun mouseCallback)
 {
-	screen->mouseCaptured = false;
-	screen->lastX = (float)WIDTH / 2.0f;
-	screen->lastY = (float)HEIGHT / 2.0f;
-
 	// Glfw initialization
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_RESIZABLE, 0);
+	glfwWindowHint(GLFW_MAXIMIZED, 1);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	screen->window = glfwCreateWindow(WIDTH, HEIGHT, "MOONMAN", NULL, NULL);
+	GLFWmonitor * monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode * mode = glfwGetVideoMode(monitor);
+	screen->width = mode->width;
+	screen->height = mode->height;
+	screen->mouseCaptured = false;
+	screen->lastX = (float)screen->width / 2.0f;
+	screen->lastY = (float)screen->height / 2.0f;
+	screen->window = glfwCreateWindow(mode->width, mode->height, "MOONMAN", monitor, NULL);
 	if (screen->window == NULL)
 	{
 		printf("Failed to initialize a GLFW window\n");
 		glfwTerminate();
 		return -1;
 	}
-	const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-	glfwSetWindowPos(screen->window, mode->width/2 - WIDTH/2, mode->height/2 - HEIGHT/2);
 	glfwMakeContextCurrent(screen->window);
 	glfwSetCursorPosCallback(screen->window, mouseCallback);
 	glfwSetInputMode(screen->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -64,7 +63,7 @@ int screenInit(Screen * screen, GLFWcursorposfun mouseCallback)
 		glfwTerminate();
 		return -1;
 	}
-	glViewport(0, 0, WIDTH, HEIGHT);
+	glViewport(0, 0, mode->width, mode->height);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_STENCIL_TEST);
 	glEnable(GL_CULL_FACE);
