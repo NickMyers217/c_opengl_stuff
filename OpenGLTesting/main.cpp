@@ -6,6 +6,7 @@
 #include "planeData.h"
 #include "Model.h"
 #include "Mesh.h"
+#include "Light.h"
 #include "utils.h"
 
 #include <stdio.h>
@@ -62,7 +63,6 @@ int main()
 	vector<Vertex> cubeVertices;
 	vector<GLuint> cubeIndices;
 	generateCubeData(cubeVertices, cubeIndices);
-
 	vector<Texture> cubeTextures;
 	cubeTextures.push_back(containerTwo);
 	cubeTextures.push_back(containerTwoSpecular);
@@ -90,6 +90,11 @@ int main()
 		glm::vec3(0.0f, 1.0f, 1.0f),
 		glm::vec3(1.0f, 1.0f, 1.0f),
 	};
+	vector<Light> pointLights(NUM_LIGHTS);
+	for (unsigned int i = 0; i < NUM_LIGHTS; i++)
+		pointLights[i] = Light::PointLight(lightPositions[i], lightColors[i]);
+	Light dirLight = Light::DirectionalLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(1.0f));
+	Light spotLight = Light::SpotLight(glm::vec3(0.0f), glm::vec3(0.0f));
 
 	Model nanosuit("C:/Users/Boromir/Downloads/nanosuit/nanosuit.obj");
 	Model suzanne("C:/Program Files/Assimp/test/models/BLEND/Suzanne_248.blend");
@@ -118,6 +123,7 @@ int main()
 		glm::mat4 modelMat;
 		glm::mat4 viewMat = freeLookCam.GetViewMatrix();
 
+
 		lampProgram.Use();
 		for (int i = 0; i < NUM_LIGHTS; i++)
 		{
@@ -134,41 +140,18 @@ int main()
 			lampMeshes[i].Draw(lampProgram);
 		}
 
+
 		texProgram.Use();
-		texProgram.SetUniform("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-		texProgram.SetUniform("dirLight.ambient", glm::vec3(0.1f));
-		texProgram.SetUniform("dirLight.diffuse", glm::vec3(0.1f));
-		texProgram.SetUniform("dirLight.specular", glm::vec3(0.1f));
-		for (int i = 0; i < NUM_LIGHTS; i++)
+		for (unsigned int i = 0; i < pointLights.size() - 1; i++)
 		{
-			std::string lightUniform = "pointLights[" + std::to_string(i) + "]";
-			if (i < 4)
-			{
-				texProgram.SetUniform((lightUniform + ".position").c_str(), lightPositions[i] + glm::vec3(0.0f, movementAmt, 0.0f));
-			}
-			else
-			{
-				texProgram.SetUniform((lightUniform + ".position").c_str(), lightPositions[i]);
-			}
-			texProgram.SetUniform((lightUniform + ".color").c_str(), lightColors[i]);
-			texProgram.SetUniform((lightUniform + ".ambient").c_str(), glm::vec3(0.1f));
-			texProgram.SetUniform((lightUniform + ".diffuse").c_str(), glm::vec3(0.4f));
-			texProgram.SetUniform((lightUniform + ".specular").c_str(), glm::vec3(1.0f));
-			texProgram.SetUniform((lightUniform + ".constant").c_str(), 1.0f);
-			texProgram.SetUniform((lightUniform + ".linear").c_str(), 0.09f);
-			texProgram.SetUniform((lightUniform + ".quadratic").c_str(), 0.032f);
+			pointLights[i].Position = lightPositions[i] + glm::vec3(0.0f, movementAmt, 0.0f);
 		}
-		texProgram.SetUniform("spotLight.position", freeLookCam.Position);
-		texProgram.SetUniform("spotLight.direction", freeLookCam.Front);
-		texProgram.SetUniform("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-		texProgram.SetUniform("spotLight.color", glm::vec3(1.0f));
-		texProgram.SetUniform("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-		texProgram.SetUniform("spotLight.ambient", glm::vec3(0.3f));
-		texProgram.SetUniform("spotLight.diffuse", glm::vec3(0.5f));
-		texProgram.SetUniform("spotLight.specular", glm::vec3(1.0f));
-		texProgram.SetUniform("spotLight.constant", 1.0f);
-		texProgram.SetUniform("spotLight.linear", 0.09f);
-		texProgram.SetUniform("spotLight.quadratic", 0.032f);
+		spotLight.Position = freeLookCam.Position;
+		spotLight.Direction = freeLookCam.Front;
+
+		texProgram.SetUniform("dirLight", dirLight);
+		texProgram.SetUniform("pointLights", pointLights);
+		texProgram.SetUniform("spotLight", spotLight);
 
 		modelMat = glm::mat4();
 		modelMat = glm::translate(modelMat, glm::vec3(0.0f, -2.0f, -5.0f));

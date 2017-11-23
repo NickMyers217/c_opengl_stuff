@@ -28,8 +28,6 @@ struct PointLight {
 struct SpotLight {
 	vec3 position;
 	vec3 direction;
-	float cutOff;
-	float outerCutOff;
 
 	vec3 color;
 	vec3 ambient;
@@ -39,11 +37,15 @@ struct SpotLight {
 	float constant;
 	float linear;
 	float quadratic;
+
+	float cutOff;
+	float outerCutOff;
 };
 
 struct DirectionalLight {
 	vec3 direction;
 
+	vec3 color;
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
@@ -68,9 +70,9 @@ vec3 calcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
 	vec3 reflectDir = reflect(-lightDir, normal);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0f), material.shininess);
 
-	vec3 ambient = light.ambient * vec3(texture(material.texture_diffuse1, texCoord));
-	vec3 diffuse = light.diffuse * diff * texture(material.texture_diffuse1, texCoord).rgb;
-	vec3 specular = light.specular * spec * texture(material.texture_specular1, texCoord).rgb;
+	vec3 ambient = light.ambient * vec3(texture(material.texture_diffuse1, texCoord)) * light.color;
+	vec3 diffuse = light.diffuse * diff * texture(material.texture_diffuse1, texCoord).rgb * light.color;
+	vec3 specular = light.specular * spec * texture(material.texture_specular1, texCoord).rgb * light.color;
 
 	return ambient + diffuse + specular;
 }
