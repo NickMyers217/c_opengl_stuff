@@ -96,16 +96,7 @@ int main()
 	for (unsigned int i = 0; i < NUM_LIGHTS; i++)
 		pointLights[i] = Light::PointLight(lightPositions[i], lightColors[i]);
 	Light dirLight = Light::DirectionalLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(1.0f));
-	Light spotLight = Light::SpotLight(
-		glm::vec3(0.0f),
-		glm::vec3(0.0f),
-		glm::vec3(1.0f),
-		glm::vec3(0.5f),
-		glm::vec3(1.0f),
-		glm::vec3(1.0f),
-		1.0f, 0.9f, 0.32f,
-		glm::cos(glm::radians(20.0f)),
-		glm::cos(glm::radians(25.0f)));
+	Light spotLight = Light::SpotLight(glm::vec3(0.0f), glm::vec3(0.0f));
 
 	Model nanosuit("C:/Users/Boromir/Downloads/nanosuit/nanosuit.obj");
 	Model suzanne("C:/Program Files/Assimp/test/models/BLEND/Suzanne_248.blend");
@@ -203,8 +194,7 @@ int main()
 		// Swap buffers
 		screenSwapAndPoll(&screen);
 	}
-
-	glCheckError();
+	MyUtils::glCheckError();
 
 	textureFree(&joey);
 	textureFree(&containerTwo);

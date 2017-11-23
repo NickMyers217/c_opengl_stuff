@@ -119,7 +119,11 @@
   <ItemGroup>
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="screen.cpp" />
+    <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="stb_image.c" />
+    <ClCompile Include="texture.cpp" />
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
