@@ -72,6 +72,20 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>C:\OpenGlLibs\Include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\OpenGlLibs\Lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\intermediates\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\intermediates\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\intermediates\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\intermediates\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -117,26 +131,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="glad.c" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="screen.cpp" />
-    <ClCompile Include="ShaderProgram.cpp" />
-    <ClCompile Include="stb_image.c" />
-    <ClCompile Include="texture.cpp" />
-    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\screen.cpp" />
+    <ClCompile Include="src\ShaderProgram.cpp" />
+    <ClCompile Include="src\stb_image.c" />
+    <ClCompile Include="src\texture.cpp" />
+    <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="cubeData.h" />
-    <ClInclude Include="Light.h" />
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="planeData.h" />
-    <ClInclude Include="ShaderProgram.h" />
-    <ClInclude Include="stb_image.h" />
-    <ClInclude Include="texture.h" />
-    <ClInclude Include="utils.h" />
-    <ClInclude Include="screen.h" />
+    <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\cubeData.h" />
+    <ClInclude Include="src\Light.h" />
+    <ClInclude Include="src\Mesh.h" />
+    <ClInclude Include="src\Model.h" />
+    <ClInclude Include="src\planeData.h" />
+    <ClInclude Include="src\ShaderProgram.h" />
+    <ClInclude Include="src\stb_image.h" />
+    <ClInclude Include="src\texture.h" />
+    <ClInclude Include="src\utils.h" />
+    <ClInclude Include="src\screen.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\basic_vertex.glsl" />
